@@ -31,7 +31,7 @@ describe('authentication', () => {
 
     it('should succeed with correct verification token', async (done) => {
       request.get('/auth/verify?token=' + verificationToken)
-      .expect(204, done)
+      .expect(200, done)
     });
 
     it('should be able to login', done => {

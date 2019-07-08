@@ -31,10 +31,33 @@ cp .env.example .env
 ```
 Make sure to correct the .env file and finally:
 ```
+yarn configure generate-key
 yarn dev
 ```
 
 Open http://127.0.0.1:3000 in the browser. API documentation is shown on http://127.0.0.1:3000/api-docs/.
+
+## Seeding data
+
+In order to add an 'administrator' and 'superuser' role:
+```
+yarn configure database:seed setup
+```
+
+To seed the database with fake users:
+```
+yarn configure database:seed faker
+```
+
+To create a 'demo@demo.com' user with password 'password':
+```
+yarn configure database:seed data
+```
+### Adding a role to an user
+
+```
+yarn configure user:assign-role [email] [role]
+```
 
 ## Running the tests
 
@@ -42,6 +65,23 @@ Make sure `database/test.db` is created.
 
 ```
 yarn test
+```
+
+## Available commands
+```
+Usage: configure [options] [command]
+
+Options:
+  -V, --version                    output the version number
+  -h, --help                       output usage information
+
+Commands:
+  generate-key                     Generate a new PASETO key
+  database:migrate                 Migrate database
+  database:rollback                Rollback database
+  database:refresh                 Refresh database
+  database:seed [folder]           Seed database
+  user:assign-role [email] [role]  Asign role to user
 ```
 
 ## Notes
