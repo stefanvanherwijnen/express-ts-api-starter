@@ -6,9 +6,10 @@ export default (roleGuard: string[]): Function => {
       next()
       return
     }
-    
+    req.roles = []
     for (let i = 0; i < roleGuard.length; i++) {
       if (await PasetoAuth.checkUserRole(roleGuard[i])) {
+        req.roles.push(roleGuard[i])
         next()
         return
       }

@@ -54,15 +54,32 @@ export async function paginate(req, schema, model, customSchema = null): Promise
     }
   }
 
+  if (req.roles) {
+    req.roles.forEach(role => {
+      if (role in JsonSerializer.schemas[schema]) {
+        customSchema = role
+      }
+    });
+  }
+
   const response = await JsonSerializer.serializeAsync(schema, results.results, customSchema, extraData)
   return response
 }
 
-export async function readResource(req, schema, model): Promise<object> {
+export async function readResource(req, schema, model, customSchema = null): Promise<object> {
   const parsedUrl = parseUrl(req)
 
   const result = await model.query().eager(parsedUrl.queryParameters.include).findById(req.params.id).throwIfNotFound()
-  const response = await JsonSerializer.serializeAsync(schema, result)
+
+  if (req.roles) {
+    req.roles.forEach(role => {
+      if (role in JsonSerializer.schemas[schema]) {
+        customSchema = role
+      }
+    });
+  }
+
+  const response = await JsonSerializer.serializeAsync(schema, result, customSchema)
   return response
 }
 
