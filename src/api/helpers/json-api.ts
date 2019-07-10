@@ -25,93 +25,91 @@ const parseUrl = (req): {
   }
 }
 
-export async function paginate(req, schema, model, customSchema = null): Promise<object> {
-  const parsedUrl = parseUrl(req)
+export async function serialize(req, results, schema, customSchema = null): Promise<object> {
+  if (req.roles) {
+    req.roles.forEach((role): void => {
+      if (role in JsonSerializer.schemas[schema]) {
+        customSchema = role
+      }
+    });
+  }
 
-  const page = parsedUrl.queryParameters.page.number
-  const pageSize = parsedUrl.queryParameters.page.size
-  const filter = parsedUrl.queryParameters.filter
+  var extraData = {}
 
-  let query = model.query().eager(parsedUrl.queryParameters.include)
+  if ('results' in results) {
+    const page = req.parsedUrl.queryParameters.page.number
+    const pageSize = req.parsedUrl.queryParameters.page.size
+    const pageQueryString = (number): string => { return '?page[number]=' + number + '?page[size]=' + pageSize }
+
+    extraData = {
+      topLevelLinks: {
+        self: req.parsedUrl.baseUrl + pageQueryString(page),
+        next: Number(page) < results.results.length ? req.parsedUrl.baseUrl + pageQueryString(Number(page) + 1) : undefined,
+        previous: Number(page) > 1 ? req.parsedUrl.baseUrl + pageQueryString(Number(page) - 1) : undefined,
+        last: req.parsedUrl.baseUrl + pageQueryString(Math.ceil(results.total / Number(pageSize)))
+      },
+      topLevelMeta: {
+        total: results.total
+      }
+    }
+    results = results.results
+  }
+  const response = await JsonSerializer.serializeAsync(schema, results, customSchema, extraData)
+  return response
+}
+
+export async function paginate(req, model): Promise<object> {
+  req.parsedUrl = req.parsedUrl ? req.parsedUrl :parseUrl(req)
+
+  const page = req.parsedUrl.queryParameters.page.number
+  const pageSize = req.parsedUrl.queryParameters.page.size
+  const filter = req.parsedUrl.queryParameters.filter
+
+  let query = model.query().eager(req.parsedUrl.queryParameters.include)
   if (typeof filter === 'object') {
     for (const field in filter) {
       query.where(field, 'like', '%' + filter[field] + '%')
     }
   }
   const results = await query.page(page - 1, pageSize)
-
-  const pageQueryString = (number): string => { return '?page[number]=' + number + '?page[size]=' + pageSize }
-
-  const extraData = {
-    topLevelLinks: {
-      self: parsedUrl.baseUrl + pageQueryString(page),
-      next: Number(page) < results.results.length ? parsedUrl.baseUrl + pageQueryString(Number(page) + 1) : undefined,
-      previous: Number(page) > 1 ? parsedUrl.baseUrl + pageQueryString(Number(page) - 1) : undefined,
-      last: parsedUrl.baseUrl + pageQueryString(Math.ceil(results.total / Number(pageSize)))
-    },
-    topLevelMeta: {
-      total: results.total
-    }
-  }
-
-  if (req.roles) {
-    req.roles.forEach(role => {
-      if (role in JsonSerializer.schemas[schema]) {
-        customSchema = role
-      }
-    });
-  }
-
-  const response = await JsonSerializer.serializeAsync(schema, results.results, customSchema, extraData)
-  return response
+  return results
 }
 
-export async function readResource(req, schema, model, customSchema = null): Promise<object> {
-  const parsedUrl = parseUrl(req)
+export async function readResource(req, model): Promise<object> {
+  req.parsedUrl = req.parsedUrl ? req.parsedUrl :parseUrl(req)
 
-  const result = await model.query().eager(parsedUrl.queryParameters.include).findById(req.params.id).throwIfNotFound()
-
-  if (req.roles) {
-    req.roles.forEach(role => {
-      if (role in JsonSerializer.schemas[schema]) {
-        customSchema = role
-      }
-    });
-  }
-
-  const response = await JsonSerializer.serializeAsync(schema, result, customSchema)
-  return response
+  const result = await model.query().eager(req.parsedUrl.queryParameters.include).findById(req.params.id).throwIfNotFound()
+  return result
 }
 
-export async function patchResource(req, schema, model, data, options = null): Promise<object> {
+export async function patchResource(req, model, data, options = null): Promise<object> {
   options = options ? options : {
     relate: true,
     unrelate: true
   }
   data.id = Number(data.id)
-  const parsedUrl = parseUrl(req)
-  const result = await model.query().eager(parsedUrl.queryParameters.include).upsertGraph(data, options)
 
-  const response = await JsonSerializer.serializeAsync(schema, result)
-  return response
+  req.parsedUrl = req.parsedUrl ? req.parsedUrl :parseUrl(req)
+  const result = await model.query().eager(req.parsedUrl.queryParameters.include).upsertGraph(data, options)
+
+  return result
 }
 
-export async function createResource(req, schema, model, data): Promise<object> {
+export async function createResource(req, model, data): Promise<object> {
   const options = {
     relate: true,
     unrelate: true
   }
   delete data.id
 
-  const parsedUrl = parseUrl(req)
-  const result = await model.query().eager(parsedUrl.queryParameters.include).insertGraph(data, options)
-  const response = await JsonSerializer.serializeAsync(schema, result)
-  return response
+  req.parsedUrl = req.parsedUrl ? req.parsedUrl :parseUrl(req)
+  const result = await model.query().eager(req.parsedUrl.queryParameters.include).insertGraph(data, options)
+  return result
 }
 
-export async function deleteResource(req, schema, model): Promise<boolean> {
-  const parsedUrl = parseUrl(req)
+export async function deleteResource(req, model): Promise<boolean> {
+  req.parsedUrl = req.parsedUrl ? req.parsedUrl :parseUrl(req)
 
-  const deletedRows = await model.query().eager(parsedUrl.queryParameters.include).delete().findById(req.params.id)
+  const deletedRows = await model.query().eager(req.parsedUrl.queryParameters.include).delete().findById(req.params.id)
   return deletedRows ? true : false
 }

@@ -1,7 +1,7 @@
 import {default as User } from "../models/user"
 import JsonSerializer from '../helpers/json-serializer'
 import databaseErrorHandler from '../helpers/database-error-handler'
-import { paginate, createResource, readResource, patchResource, deleteResource } from '../helpers/json-api'
+import { serialize, paginate, createResource, readResource, patchResource, deleteResource } from '../helpers/json-api'
 import bcrypt from "bcrypt"
 
 class Controller {
@@ -41,8 +41,8 @@ class Controller {
   */
   public async index(req, res): Promise<void> {
     try {
-      const results = await paginate(req, 'user', User, 'superuser')
-      res.send(results)
+      const results = await paginate(req, User)
+      res.send(await serialize(req, results, 'user'))
     } catch (err) {
       res.status(err.statusCode ? err.statusCode : 400).send(JsonSerializer.serializeError(databaseErrorHandler(err)))
     }
@@ -110,8 +110,8 @@ class Controller {
       const data = await JsonSerializer.deserializeAsync('user', req.body)
       data.password = password
 
-      const response = await createResource(req, 'user', User, data)
-      res.send(response)
+      const result = await createResource(req, User, data)
+      res.send(await serialize(req, result, 'user'))
     } catch (err) {
       res.status(err.statusCode ? err.statusCode : 400).send(JsonSerializer.serializeError(databaseErrorHandler(err)))
     }
@@ -160,8 +160,8 @@ class Controller {
   */
   public async read(req, res): Promise<void> {
     try {
-      const result = await readResource(req, 'user', User)
-      res.send(result)
+      const result = await readResource(req, User)
+      res.send(await serialize(req, result, 'user'))
     } catch (err) {
       res.status(err.statusCode ? err.statusCode : 400).send(JsonSerializer.serializeError(databaseErrorHandler(err)))
     }
@@ -226,10 +226,12 @@ class Controller {
     try {
       const data = await JsonSerializer.deserializeAsync('user', req.body)
 
-      data.password = data.password ? await bcrypt.hash(data.password, 10) : undefined
+      if (data.password) {
+        data.password = await bcrypt.hash(data.password, 10)
+      }
 
-      const response = await patchResource(req, 'user', User, data, {relate: true, unrelate: true, noRelate: true, noUnrelate: true})
-      res.send(response)
+      const result = await patchResource(req, User, data, {relate: true, unrelate: true, noRelate: true, noUnrelate: true})
+      res.send(await serialize(req, result, 'user'))
     } catch (err) {
       throw err
       res.status(err.statusCode ? err.statusCode : 400).send(JsonSerializer.serializeError(databaseErrorHandler(err)))
@@ -260,7 +262,7 @@ class Controller {
   */
   public async delete(req, res): Promise<void> {
     try {
-      const deleted = await deleteResource(req, 'user', User)
+      const deleted = await deleteResource(req, User)
       if (deleted) {
         res.status(200).send()
       } else {

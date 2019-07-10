@@ -5,7 +5,7 @@ const knex = Knex(config)
 
 module.exports = async () => {
     process.env.APP_ENV = process.env.NODE_ENV
-    await knex.migrate.rollback({}, true)
+    await knex.migrate.rollback()
     await knex.migrate.latest()
     await knex.seed.run()
 
