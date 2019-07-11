@@ -25,7 +25,7 @@ export default class Role extends Model {
         },
         to: "users.id",
       },
-      modelClass: User,
+      modelClass: __dirname + '/user',
       relation: Model.HasOneRelation,
     },
   }

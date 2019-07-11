@@ -87,7 +87,7 @@ export default class User extends Model {
   public static relationMappings = {
     roles: {
       relation: Model.ManyToManyRelation,
-      modelClass: Role,
+      modelClass: __dirname + '/role',
       join: {
         from: "users.id",
         through: {
