@@ -1,11 +1,10 @@
 import express from "express"
 import AuthController from "./api/controllers/auth-controller"
-import UserController from "./api/controllers/user-controller"
+import UsersController from "./api/controllers/users-controller"
 import JsonSerializer from './api/helpers/json-serializer'
 
 import authMiddleware from "./api/middleware/auth"
 import roleMiddleware from "./api/middleware/roles"
-
 
 async function jsonApiPayload (req, res, next): Promise<void> {
   if (req.body.hasOwnProperty('data')) {
@@ -62,11 +61,11 @@ async function jsonApiPayload (req, res, next): Promise<void> {
  *      description: User does not have the correct permissions
  */
 const userRoutes = express.Router()
-  .get("/", UserController.index)
-  .post("/", jsonApiPayload, UserController.create)
-  .get("/:id", UserController.read)
-  .patch("/", jsonApiPayload, UserController.update)
-  .delete("/:id", UserController.delete)
+  .get("/", UsersController.index)
+  .post("/", jsonApiPayload, UsersController.create)
+  .get("/:id", UsersController.read)
+  .patch("/", jsonApiPayload, UsersController.update)
+  .delete("/:id", UsersController.delete)
 
 const authRoutes = express.Router()
   .post("/login", AuthController.login)
