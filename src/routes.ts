@@ -7,7 +7,7 @@ import authMiddleware from "./api/middleware/auth"
 import roleMiddleware from "./api/middleware/roles"
 
 async function jsonApiPayload (req, res, next): Promise<void> {
-  if (req.body.hasOwnProperty('data')) {
+  if (Object.prototype.hasOwnProperty.call(req.body, 'data')) {
     next()
   } else {
     res.status(422).send(JsonSerializer.serializeError(new Error('JSON API format required.')))

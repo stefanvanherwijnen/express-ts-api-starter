@@ -3,7 +3,6 @@ import { wrapError, DBError, NotNullViolationError, UniqueViolationError, Foreig
 export default function (err): Error {
   err = wrapError(err);
   let message, name
-  let error
   if (err instanceof UniqueViolationError) {
     name ='UniqueViolationError'
     message = `Unique constraint ${err.constraint} failed for table ${err.table} and columns ${err.columns}`
@@ -20,7 +19,7 @@ export default function (err): Error {
   } else {
     return err
   }
-  error = new Error(message)
+  const error = new Error(message)
   error.code = name
   error.statusCode = err.statusCode
   return error

@@ -83,7 +83,8 @@ export class Controller {
     }
 
     user.verificationToken = randomstring.generate(64)
-    user.password = await bcrypt.hash(user.password, 10)
+    Object.assign(user, {password: await bcrypt.hash(user.password, 10)})
+    // user.password = await bcrypt.hash(user.password, 10)
 
     User.query().insert(user).then((): void => {
       if (process.env.NODE_ENV === 'test') {

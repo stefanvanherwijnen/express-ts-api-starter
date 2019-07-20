@@ -22,7 +22,8 @@ afterEach((done) => {
   done()
 });
 
-afterAll(async (done) => {
-  await knex.destroy()
-  done()
+afterAll((done) => {
+  return knex.destroy().then(() => {
+    done()
+  })
 })

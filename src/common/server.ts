@@ -56,7 +56,7 @@ export default class ExpressServer {
   public listen(port = process.env.PORT): http.Server {
     const welcome: Function = (p: string): void => l.info(`Up and running in ${process.env.NODE_ENV || "development"} @: ${os.hostname()} on port: ${p}}`)
 
-    let server = http.createServer(app).listen(port, welcome(port))
+    const server = http.createServer(app).listen(port, welcome(port))
     return server
   }
 

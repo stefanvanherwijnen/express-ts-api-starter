@@ -1,5 +1,5 @@
 import JSONAPISerializer from 'json-api-serializer'
 
-var Serializer = new JSONAPISerializer();
+const Serializer = new JSONAPISerializer();
 
 export default Serializer

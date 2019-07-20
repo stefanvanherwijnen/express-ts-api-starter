@@ -5,7 +5,7 @@ export default async function(req, res, next): Promise<void> {
   //   next()
   //   return
   // }
-  let user = await PasetoAuth.getUser()
+  const user = await PasetoAuth.getUser()
   if (user) {
     next()
     return

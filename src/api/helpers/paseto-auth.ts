@@ -94,7 +94,7 @@ class PasetoAuth {
   }
 
   public getExpireTime = (): Date => {
-    let time = new Date()
+    const time = new Date()
     return new Date(time.setHours(time.getHours() + Number(process.env.PASETO_EXPIRE_AFTER_HOURS)))
   }
 
@@ -135,7 +135,7 @@ class PasetoAuth {
 
   public async verifyUserId (id, grantAccessTo = null): Promise<boolean> {
     if (grantAccessTo) {
-      for (let role of grantAccessTo) {
+      for (const role of grantAccessTo) {
         if (await this.checkUserRole(role)) {
           return true
         }
@@ -145,7 +145,7 @@ class PasetoAuth {
     if (id && user && Number(user.id) === Number(id)) {
       return true
     } else {
-      let error =  new Error('Forbidden')
+      const error =  new Error('Forbidden')
       error.statusCode = 403
       throw error
     }

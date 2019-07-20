@@ -34,7 +34,7 @@ export async function serialize(req, results, schema, customSchema = null): Prom
     });
   }
 
-  var extraData = {}
+  let extraData = {}
 
   if ('results' in results) {
     const page = req.parsedUrl.queryParameters.page.number
@@ -65,7 +65,7 @@ export async function paginate(req, model): Promise<object> {
   const pageSize = req.parsedUrl.queryParameters.page.size
   const filter = req.parsedUrl.queryParameters.filter
 
-  let query = model.query().eager(req.parsedUrl.queryParameters.include)
+  const query = model.query().eager(req.parsedUrl.queryParameters.include)
   if (typeof filter === 'object') {
     for (const field in filter) {
       query.where(field, 'like', '%' + filter[field] + '%')

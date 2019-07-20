@@ -106,7 +106,7 @@ class Controller {
   */
   public async create(req, res): Promise<void> {
     try {
-      let password = req.body.data.attributes.password ? await bcrypt.hash(req.body.data.attributes.password, 10) : undefined
+      const password = req.body.data.attributes.password ? await bcrypt.hash(req.body.data.attributes.password, 10) : undefined
 
       const data = await JsonSerializer.deserializeAsync('user', req.body)
       data.password = password
@@ -236,7 +236,6 @@ class Controller {
       const result = await patchResource(req, User, data, {relate: true, unrelate: true, noRelate: true, noUnrelate: true})
       res.send(await serialize(req, result, 'user'))
     } catch (err) {
-      throw err
       const error = databaseErrorHandler(err)
       res.status(error.statusCode ? error.statusCode : 400).send(JsonSerializer.serializeError(error))
     }
