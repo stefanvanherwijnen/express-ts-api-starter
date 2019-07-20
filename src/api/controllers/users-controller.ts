@@ -44,7 +44,8 @@ class Controller {
       const results = await paginate(req, User)
       res.send(await serialize(req, results, 'user'))
     } catch (err) {
-      res.status(err.statusCode ? err.statusCode : 400).send(JsonSerializer.serializeError(databaseErrorHandler(err)))
+      const error = databaseErrorHandler(err)
+      res.status(error.statusCode ? error.statusCode : 400).send(JsonSerializer.serializeError(error))
     }
   }
 
@@ -113,7 +114,8 @@ class Controller {
       const result = await createResource(req, User, data)
       res.send(await serialize(req, result, 'user'))
     } catch (err) {
-      res.status(err.statusCode ? err.statusCode : 400).send(JsonSerializer.serializeError(databaseErrorHandler(err)))
+      const error = databaseErrorHandler(err)
+      res.status(error.statusCode ? error.statusCode : 400).send(JsonSerializer.serializeError(error))
     }
   }
 
@@ -163,7 +165,8 @@ class Controller {
       const result = await readResource(req, User)
       res.send(await serialize(req, result, 'user'))
     } catch (err) {
-      res.status(err.statusCode ? err.statusCode : 400).send(JsonSerializer.serializeError(databaseErrorHandler(err)))
+      const error = databaseErrorHandler(err)
+      res.status(error.statusCode ? error.statusCode : 400).send(JsonSerializer.serializeError(error))
     }
   }
 
@@ -234,7 +237,8 @@ class Controller {
       res.send(await serialize(req, result, 'user'))
     } catch (err) {
       throw err
-      res.status(err.statusCode ? err.statusCode : 400).send(JsonSerializer.serializeError(databaseErrorHandler(err)))
+      const error = databaseErrorHandler(err)
+      res.status(error.statusCode ? error.statusCode : 400).send(JsonSerializer.serializeError(error))
     }
   }
 
@@ -269,7 +273,8 @@ class Controller {
         res.status(404).send()
       }
     } catch (err) {
-      res.status(err.statusCode ? err.statusCode : 400).send(JsonSerializer.serializeError(databaseErrorHandler(err)))
+      const error = databaseErrorHandler(err)
+      res.status(error.statusCode ? error.statusCode : 400).send(JsonSerializer.serializeError(error))
     }
   }
 }
