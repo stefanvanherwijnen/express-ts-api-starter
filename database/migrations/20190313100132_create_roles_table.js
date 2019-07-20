@@ -4,7 +4,7 @@ exports.up = function(knex, Promise) {
     table.string('name').nullable().unique()
     table.timestamps(false, true)
   })
-};
+}
 
 exports.down = function(knex, Promise) {
   return knex.schema.dropTable('roles');

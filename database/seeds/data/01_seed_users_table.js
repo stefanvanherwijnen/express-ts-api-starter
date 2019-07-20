@@ -5,11 +5,17 @@ exports.seed = function(knex, Promise) {
   .then(function () {
     return knex('users').insert([
     {
-      name: 'Test user',
-      email: 'demo@demo.com',
+      name: 'Admin test user',
+      email: 'admin@demo.com',
+      password: bcrypt.hashSync('password', 10),
+      verified: true
+    },
+    {
+      name: 'Normal test user',
+      email: 'user@demo.com',
       password: bcrypt.hashSync('password', 10),
       verified: true
     }
     ])
   })
-};
+}

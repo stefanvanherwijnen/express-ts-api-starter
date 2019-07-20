@@ -9,8 +9,8 @@ exports.up = function(knex, Promise) {
     table.string('password_reset_token').nullable()
     table.timestamps(false, true)
   })
-};
+}
 
 exports.down = function(knex, Promise) {
   return knex.schema.dropTable('users')
-};
+}

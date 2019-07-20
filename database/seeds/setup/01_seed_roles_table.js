@@ -10,6 +10,6 @@ exports.seed = function(knex, Promise) {
         {
           name: 'superuser'
         }
-        ]);
+        ])
       })
-};
+}

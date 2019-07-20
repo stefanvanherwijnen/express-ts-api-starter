@@ -13,4 +13,4 @@ exports.seed = function(knex, Promise) {
     fakeUsers.push(createFakeUser())
   }
   return knex('users').insert(fakeUsers);
-};
+}
