@@ -14,4 +14,6 @@ module.exports = async () => {
     pathArray[pathArray.length - 1] = 'data'
     config.seeds.directory = pathArray.join('/')
     await knex.seed.run(config)
+
+    await knex.destroy()
 }
