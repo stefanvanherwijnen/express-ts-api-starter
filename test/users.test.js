@@ -3,15 +3,21 @@ import appConfig from '../src/common/server';
 import routes from '../src/routes';
 import supertest from 'supertest';
 import JsonSerializer from '../src/api/helpers/json-serializer'
+import PasetoAuth from '../src/api/helpers/paseto-auth'
 
 import { JsonApiTest } from './jsonapi'
 
-var app = (new appConfig).router(routes).create()
-let request = supertest(app);
+import './helpers/transactional_tests'
+
+var app = (new appConfig).router(routes)
+var server = app.create()
+let request = supertest(server);
 
 describe('user', () => {
-  process.env.TEST_IS_ADMIN = true
-
+  afterAll(() => {
+    app.close(server)
+  });
+  
   const user = {
     email: 'randomuser@user.test',
     password: 'PasswordForTtesting',
@@ -26,6 +32,10 @@ describe('user', () => {
   data.data.attributes.password = 'passwordtest'
 
   describe('jsonapi', () => {
+    it('should login as admin', async () => {
+      await PasetoAuth.loginById(1)
+    })
+
     JsonApiTest(request, '/users', 'user', data, updatedData)
   })
 })

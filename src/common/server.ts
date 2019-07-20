@@ -22,7 +22,6 @@ i18n.configure({
 })
 
 const env = process.env.NODE_ENV || process.env.APP_ENV
-console.log('Environment: ' + env)
 const knex = Knex(knexConfig[env])
 Model.knex(knex)
 
@@ -65,8 +64,8 @@ export default class ExpressServer {
     return app
   }
 
-  public async close (server): Promise<void> {
+  public async close (): Promise<void> {
     await knex.destroy()
-    return server.close()
+    return
   }
 }

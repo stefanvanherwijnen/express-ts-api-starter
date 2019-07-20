@@ -5,10 +5,15 @@ import supertest from 'supertest';
 
 import randomstring from "randomstring"
 
-var app = (new appConfig).router(routes).create()
-let request = supertest(app);
+var app = (new appConfig).router(routes)
+var server = app.create()
+let request = supertest(server);
 
 describe('authentication', () => {
+  afterAll(() => {
+    app.close(server)
+  });
+
   var verificationToken = ''
   var passwordResetToken = ''
   var token = ''

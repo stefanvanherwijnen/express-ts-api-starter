@@ -7,8 +7,6 @@ module.exports = {
 
   globalSetup: "<rootDir>/test/environment/setup.js",
 
-  globalTeardown: "<rootDir>/test/environment/teardown.js",
-
   moduleFileExtensions: [
     "ts",
     "js",
