@@ -1,7 +1,7 @@
 import "../src/common/env"
-import appConfig from '../src/common/server';
-import routes from '../src/routes';
-import supertest from 'supertest';
+import appConfig from '../src/common/server'
+import routes from '../src/routes'
+import supertest from 'supertest'
 import JsonSerializer from '../src/api/helpers/json-serializer'
 import PasetoAuth from '../src/api/helpers/paseto-auth'
 
@@ -11,12 +11,12 @@ import './helpers/transactional_tests'
 
 var app = (new appConfig).router(routes)
 var server = app.create()
-let request = supertest(server);
+let request = supertest(server)
 
 describe('user', () => {
   afterAll(() => {
     app.close(server)
-  });
+  })
   
   const user = {
     email: 'randomuser@user.test',

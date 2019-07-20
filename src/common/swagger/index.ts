@@ -11,13 +11,13 @@ const options = {
   },
   // Path to the API docs
   apis: ['src/api/controllers/*.ts', 'src/routes.ts'],
-};
-const swaggerSpec = swaggerJSDoc(options);
+}
+const swaggerSpec = swaggerJSDoc(options)
 
 export default function (app): void {
-  app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(null, {swaggerUrl: '/swagger.json'}));
+  app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(null, {swaggerUrl: '/swagger.json'}))
   app.get('/swagger.json', (req, res): void => {
-    res.setHeader('Content-Type', 'application/json');
-    res.send(swaggerSpec);
-  });
+    res.setHeader('Content-Type', 'application/json')
+    res.send(swaggerSpec)
+  })
 }

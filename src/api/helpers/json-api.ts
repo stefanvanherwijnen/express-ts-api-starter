@@ -31,7 +31,7 @@ export async function serialize(req, results, schema, customSchema = null): Prom
       if (role in JsonSerializer.schemas[schema]) {
         customSchema = role
       }
-    });
+    })
   }
 
   let extraData = {}

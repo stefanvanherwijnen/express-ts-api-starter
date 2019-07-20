@@ -1,9 +1,9 @@
-import bcrypt from "bcrypt"
-import { Request } from "express"
-import Paseto from "paseto.js"
-import User from "../models/user"
+import bcrypt from 'bcrypt'
+import { Request } from 'express'
+import Paseto from 'paseto.js'
+import User from '../models/user'
 
-import { JsonToken, Rules } from "paseto.js"
+import { JsonToken, Rules } from 'paseto.js'
 
 class PasetoAuth {
   public user: User
@@ -21,7 +21,7 @@ class PasetoAuth {
    * @return {Promise}              [description]
    */
   public async login(credentials: {email: string, password: string}): Promise<string|boolean> {
-    this.user = await User.query().eager('roles').findOne("email", credentials.email)
+    this.user = await User.query().eager('roles').findOne('email', credentials.email)
 
     if (this.user && this.user.verified && this.validateByCredentials(credentials)) {
       const token = this.generateTokenForuser()
@@ -69,7 +69,7 @@ class PasetoAuth {
    */
   public async getTokenBuilder(): Promise<Paseto.Builder> {
     return new Paseto.Builder()
-      .setPurpose("local")
+      .setPurpose('local')
       .setKey(await this.getSharedKey())
       .setExpiration(this.getExpireTime())
       .setIssuer(this.getIssuer())
@@ -107,7 +107,7 @@ class PasetoAuth {
   }
 
   public getTokenFromRequest(): string {
-    return this.request.header("Authorization").replace("Bearer ", "")
+    return this.request.header('Authorization').replace('Bearer ', '')
   }
 
   public async getUser(): Promise<User> {

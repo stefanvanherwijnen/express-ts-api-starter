@@ -11,6 +11,8 @@ module.exports = {
         "SharedArrayBuffer": "readonly"
     },
     "rules": {
+        "quotes": ["error", "single"],
+        "semi": ["error", "never"],
         "indent": "off",
         "@typescript-eslint/no-unused-vars": ["error", { "argsIgnorePattern": "(next|res|req)" }],
         "@typescript-eslint/indent": ["error", 2],

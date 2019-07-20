@@ -1,18 +1,18 @@
 import "../src/common/env"
-import appConfig from '../src/common/server';
-import routes from '../src/routes';
-import supertest from 'supertest';
+import appConfig from '../src/common/server'
+import routes from '../src/routes'
+import supertest from 'supertest'
 
 import PasetoAuth from '../src/api/helpers/paseto-auth'
 
 var app = (new appConfig).router(routes)
 var server = app.create()
-let request = supertest(server);
+let request = supertest(server)
 
 describe('authorization', () => {
   afterAll(() => {
     app.close(server)
-  });
+  })
 
   var user
   it('should login as user', async (done) => {

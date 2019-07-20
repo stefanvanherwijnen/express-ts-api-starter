@@ -1,18 +1,18 @@
 import "../src/common/env"
-import appConfig from '../src/common/server';
-import routes from '../src/routes';
-import supertest from 'supertest';
+import appConfig from '../src/common/server'
+import routes from '../src/routes'
+import supertest from 'supertest'
 
 import randomstring from "randomstring"
 
 var app = (new appConfig).router(routes)
 var server = app.create()
-let request = supertest(server);
+let request = supertest(server)
 
 describe('authentication', () => {
   afterAll(() => {
     app.close(server)
-  });
+  })
 
   var verificationToken = ''
   var passwordResetToken = ''
@@ -32,12 +32,12 @@ describe('authentication', () => {
           verificationToken = response.body.verificationToken
           done()
         })
-    });
+    })
 
     it('should succeed with correct verification token', async (done) => {
       request.get('/auth/verify?token=' + verificationToken)
         .expect(200, done)
-    });
+    })
 
     it('should be able to login', done => {
       request.post('/auth/login')
@@ -102,7 +102,7 @@ describe('authentication', () => {
         .then((response) => {
           done()
         })
-    });
+    })
   })
 
   describe('login', () => {
@@ -142,4 +142,4 @@ describe('authentication', () => {
     })
   })
 
-});
+})

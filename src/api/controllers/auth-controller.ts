@@ -1,8 +1,8 @@
-import bcrypt from "bcrypt"
-import randomstring from "randomstring"
-import PasetoAuth from "../helpers/paseto-auth"
-import {default as User, UserStruct } from "../models/user"
-import mailer from "../../common/email"
+import bcrypt from 'bcrypt'
+import randomstring from 'randomstring'
+import PasetoAuth from '../helpers/paseto-auth'
+import {default as User, UserStruct } from '../models/user'
+import mailer from '../../common/email'
 import JsonSerializer from '../helpers/json-serializer'
 import databaseErrorHandler from '../helpers/database-error-handler'
 
@@ -131,7 +131,7 @@ export class Controller {
   public async verify(req, res): Promise<void> {
     if (req.query.token)  {
       const token = req.query.token
-      const user = await User.query().where("verification_token", token).where("verified", 0).first()
+      const user = await User.query().where('verification_token', token).where('verified', 0).first()
       if (user) {
         user.verify()
         res.status(200).send(res.__('verification.success'))
@@ -185,7 +185,7 @@ export class Controller {
       const credentials = {email: req.body.email, password: req.body.password}
 
 
-      const user = await User.query().eager('roles').findOne("email", credentials.email)
+      const user = await User.query().eager('roles').findOne('email', credentials.email)
       const token = await PasetoAuth.login(credentials)
       if (user) {
         if (!user.verified) {
@@ -269,7 +269,7 @@ export class Controller {
       if (req.query.token) {
         if (req.body.password) {
           const hash = await bcrypt.hash(req.body.password, 10)
-          await User.query().patch({password: hash}).where("password_reset_token", req.query.token).throwIfNotFound()
+          await User.query().patch({password: hash}).where('password_reset_token', req.query.token).throwIfNotFound()
           res.status(204).send()
         } else {
           res.status(422).send()

@@ -1,10 +1,10 @@
-import express from "express"
-import AuthController from "./api/controllers/auth-controller"
-import UsersController from "./api/controllers/users-controller"
+import express from 'express'
+import AuthController from './api/controllers/auth-controller'
+import UsersController from './api/controllers/users-controller'
 import JsonSerializer from './api/helpers/json-serializer'
 
-import authMiddleware from "./api/middleware/auth"
-import roleMiddleware from "./api/middleware/roles"
+import authMiddleware from './api/middleware/auth'
+import roleMiddleware from './api/middleware/roles'
 
 async function jsonApiPayload (req, res, next): Promise<void> {
   if (Object.prototype.hasOwnProperty.call(req.body, 'data')) {
@@ -61,23 +61,23 @@ async function jsonApiPayload (req, res, next): Promise<void> {
  *      description: User does not have the correct permissions
  */
 const userRoutes = express.Router()
-  .get("/", UsersController.index)
-  .post("/", jsonApiPayload, UsersController.create)
-  .get("/:id", UsersController.read)
-  .patch("/", jsonApiPayload, UsersController.update)
-  .delete("/:id", UsersController.delete)
+  .get('/', UsersController.index)
+  .post('/', jsonApiPayload, UsersController.create)
+  .get('/:id', UsersController.read)
+  .patch('/', jsonApiPayload, UsersController.update)
+  .delete('/:id', UsersController.delete)
 
 const authRoutes = express.Router()
-  .post("/login", AuthController.login)
-  .post("/register", AuthController.register)
-  .get("/verify", AuthController.verify)
-  .get("/user", authMiddleware, AuthController.getUser)
+  .post('/login', AuthController.login)
+  .post('/register', AuthController.register)
+  .get('/verify', AuthController.verify)
+  .get('/user', authMiddleware, AuthController.getUser)
   .post('/password/forgot', AuthController.passwordForgot)
   .post('/password/reset', AuthController.passwordReset)
 
 
 export default function routes(app): void {
-  app.use("/auth", authRoutes)
-  app.use("/users", authMiddleware, roleMiddleware(['superuser']), userRoutes)
-  app.use("/admin", authMiddleware, roleMiddleware(['administrator']), (res, req): void => {res.send('Administrator')})
+  app.use('/auth', authRoutes)
+  app.use('/users', authMiddleware, roleMiddleware(['superuser']), userRoutes)
+  app.use('/admin', authMiddleware, roleMiddleware(['administrator']), (res, req): void => {res.send('Administrator')})
 }

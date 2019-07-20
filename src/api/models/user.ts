@@ -1,5 +1,5 @@
-import { Model, snakeCaseMappers } from "objection"
-import Role from "./role"
+import { Model, snakeCaseMappers } from 'objection'
+import Role from './role'
 import { superstruct } from 'superstruct'
 import isEmail from 'is-email'
 import JsonSerializer from '../helpers/json-serializer'
@@ -7,12 +7,12 @@ import JsonSerializer from '../helpers/json-serializer'
 
 const jsonSerializerConfig = {
   jsonapiObject: false,
-  whitelistOnDeserialize: ["id", "name", "email"],
-  convertCase: "camelCase",
-  unconvertCase: "snake_case",
+  whitelistOnDeserialize: ['id', 'name', 'email'],
+  convertCase: 'camelCase',
+  unconvertCase: 'snake_case',
   relationships: {
     roles: {
-      type: "role",
+      type: 'role',
       deserialize: (data): {id: string} => ({ id: data.id })
     }
   },
@@ -35,12 +35,12 @@ const jsonSerializerConfig = {
   }
 }
 
-JsonSerializer.register("user", {
-  ...jsonSerializerConfig, blacklist: ["password", "verificationToken", 'verified', "passwordResetToken", "createdAt", "updatedAt"]
-});
+JsonSerializer.register('user', {
+  ...jsonSerializerConfig, blacklist: ['password', 'verificationToken', 'verified', 'passwordResetToken', 'createdAt', 'updatedAt']
+})
 
 JsonSerializer.register('user', 'superuser', {
-  ...jsonSerializerConfig, blacklist: ["password", "passwordResetToken", "createdAt", "updatedAt"],
+  ...jsonSerializerConfig, blacklist: ['password', 'passwordResetToken', 'createdAt', 'updatedAt'],
 })
 
 const struct = superstruct({
@@ -69,18 +69,18 @@ export default class User extends Model {
   public roles: Role[]
   public roleNames: string[]
 
-  public static tableName = "users"
+  public static tableName = 'users'
 
   public static jsonSchema = {
-    type: "object",
-    required: ["email"],
+    type: 'object',
+    required: ['email'],
     properties: {
-      id: { type: "integer" },
-      email: { type: "string", format: "email" },
-      name: { type: "string", minLength: 1, maxLength: 255 },
-      password: { type: "string" },
-      verified: { type: "boolean" },
-      verificationToken: { type: "string" },
+      id: { type: 'integer' },
+      email: { type: 'string', format: 'email' },
+      name: { type: 'string', minLength: 1, maxLength: 255 },
+      password: { type: 'string' },
+      verified: { type: 'boolean' },
+      verificationToken: { type: 'string' },
       passwordResetToken: { type: 'string' },
       roleNames: { type: 'array' },
     },
@@ -91,12 +91,12 @@ export default class User extends Model {
       relation: Model.ManyToManyRelation,
       modelClass: __dirname + '/role',
       join: {
-        from: "users.id",
+        from: 'users.id',
         through: {
-          from: "roles_roleable.user_id",
-          to: "roles_roleable.role_id",
+          from: 'roles_roleable.user_id',
+          to: 'roles_roleable.role_id',
         },
-        to: "roles.id",
+        to: 'roles.id',
       },
     },
   }
@@ -108,16 +108,16 @@ export default class User extends Model {
   }
 
   public static get columnNameMappers(): object {
-    return snakeCaseMappers();
+    return snakeCaseMappers()
   }
 
   public async assignRole(name): Promise<void> {
-    const role = await Role.query().findOne("name", name)
-    await this.$relatedQuery("roles").relate(role.id)
+    const role = await Role.query().findOne('name', name)
+    await this.$relatedQuery('roles').relate(role.id)
   }
 
   public async verify(): Promise<void> {
     // @ts-ignore
-    await this.$query().patch({verified: true, verificationToken: "" })
+    await this.$query().patch({verified: true, verificationToken: '' })
   }
 }

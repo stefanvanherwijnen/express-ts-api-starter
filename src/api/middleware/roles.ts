@@ -1,4 +1,4 @@
-import PasetoAuth from "../helpers/paseto-auth"
+import PasetoAuth from '../helpers/paseto-auth'
 
 export default (roleGuard: string[]): Function => {
   return async (req, res, next): Promise<void> => {
@@ -11,7 +11,7 @@ export default (roleGuard: string[]): Function => {
       if (await PasetoAuth.checkUserRole(roleGuard[i])) {
         req.roles.push(roleGuard[i])
       } else {
-        res.status(403).json({errors: {title: "Forbidden"}})
+        res.status(403).json({errors: {title: 'Forbidden'}})
       }
     }
     if (req.roles.length) {

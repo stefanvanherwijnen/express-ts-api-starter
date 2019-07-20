@@ -7,9 +7,13 @@ module.exports = {
     es6: true,
     amd: true,
   },
+  parser: "babel-eslint",
+  parserOptions: {
+    ecmaVersion: 8, 
+    sourceType: "module"
+  },
   overrides: [
     {
-      parser: "babel-eslint",
       files: [
         "**/*.test.js"
       ],
@@ -20,14 +24,12 @@ module.exports = {
       // "extends": ["plugin:jest/recommended"]
       plugins: ["jest"],
       rules: {
+        "semi": ["error", "never"],
         "jest/no-disabled-tests": "warn",
         "jest/no-focused-tests": "error",
         "jest/no-identical-title": "error",
         "jest/prefer-to-have-length": "warn",
         "jest/valid-expect": "error"
-      },
-      parserOptions: {
-        sourceType: "module"
       }
     }
   ],

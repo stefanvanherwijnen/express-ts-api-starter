@@ -1,4 +1,4 @@
-import PasetoAuth from "../helpers/paseto-auth"
+import PasetoAuth from '../helpers/paseto-auth'
 
 export default async function(req, res, next): Promise<void> {
   // if (process.env.TEST_IS_ADMIN && process.env.NODE_ENV === 'test') {
@@ -10,7 +10,7 @@ export default async function(req, res, next): Promise<void> {
     next()
     return
   }
-  if (req.header("Authorization") !== undefined) {
+  if (req.header('Authorization') !== undefined) {
     PasetoAuth.setRequest(req)
     const authorized = await PasetoAuth.check()
     if (authorized) {
@@ -18,5 +18,5 @@ export default async function(req, res, next): Promise<void> {
       return
     }
   }
-  res.status(401).json({errors: {title: "Unauthorized"}})
+  res.status(401).json({errors: {title: 'Unauthorized'}})
 }

@@ -1,7 +1,7 @@
 import { wrapError, DBError, NotNullViolationError, UniqueViolationError, ForeignKeyViolationError } from 'db-errors'
 
 export default function (err): Error {
-  err = wrapError(err);
+  err = wrapError(err)
   let message, name
   if (err instanceof UniqueViolationError) {
     name ='UniqueViolationError'

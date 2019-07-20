@@ -1,8 +1,8 @@
-import {default as User } from "../models/user"
+import {default as User } from '../models/user'
 import JsonSerializer from '../helpers/json-serializer'
 import databaseErrorHandler from '../helpers/database-error-handler'
 import { serialize, paginate, createResource, readResource, patchResource, deleteResource } from '../helpers/json-api'
-import bcrypt from "bcrypt"
+import bcrypt from 'bcrypt'
 
 class Controller {
   /**
