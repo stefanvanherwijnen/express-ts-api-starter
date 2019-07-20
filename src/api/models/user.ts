@@ -8,6 +8,8 @@ import JsonSerializer from '../helpers/json-serializer'
 const jsonSerializerConfig = {
   jsonapiObject: false,
   whitelistOnDeserialize: ["id", "name", "email"],
+  convertCase: "camelCase",
+  unconvertCase: "snake_case",
   relationships: {
     roles: {
       type: "role",
@@ -113,13 +115,6 @@ export default class User extends Model {
     const role = await Role.query().findOne("name", name)
     await this.$relatedQuery("roles").relate(role.id)
   }
-
-  /* eslint-disable */
-  public async getRoles() {
-    const roles = await this.$relatedQuery("roles").pluck("name")
-    return roles
-  }
-  /* eslint-enable */
 
   public async verify(): Promise<void> {
     // @ts-ignore

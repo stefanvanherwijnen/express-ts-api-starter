@@ -1,7 +1,12 @@
 import PasetoAuth from "../helpers/paseto-auth"
 
 export default async function(req, res, next): Promise<void> {
-  if (process.env.TEST_IS_ADMIN && process.env.NODE_ENV === 'test') {
+  // if (process.env.TEST_IS_ADMIN && process.env.NODE_ENV === 'test') {
+  //   next()
+  //   return
+  // }
+  let user = await PasetoAuth.getUser()
+  if (user) {
     next()
     return
   }

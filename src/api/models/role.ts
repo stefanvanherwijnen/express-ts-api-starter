@@ -1,5 +1,4 @@
 import { Model } from "objection"
-import User from "./user"
 
 import JsonSerializer from '../helpers/json-serializer'
 

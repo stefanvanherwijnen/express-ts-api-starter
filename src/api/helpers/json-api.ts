@@ -110,6 +110,9 @@ export async function createResource(req, model, data): Promise<object> {
 export async function deleteResource(req, model): Promise<boolean> {
   req.parsedUrl = req.parsedUrl ? req.parsedUrl :parseUrl(req)
 
-  const deletedRows = await model.query().eager(req.parsedUrl.queryParameters.include).delete().findById(req.params.id)
+  const deletedRows = await model.query().eager(req.parsedUrl.queryParameters.include).findById(req.params.id)
+  if (deletedRows) {
+    await deletedRows.$query().delete()
+  }
   return deletedRows ? true : false
 }

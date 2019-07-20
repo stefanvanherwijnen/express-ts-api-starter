@@ -125,12 +125,37 @@ class PasetoAuth {
 
   public async checkUserRole (role): Promise<boolean> {
     if (this.user) {
-      const roles = await this.user.getRoles()
-      if (roles.includes(role)) {
+      this.user = await this.user.$loadRelated('roles')
+      if (this.user.roleNames.includes(role)) {
         return true
       }
     }
     return false
+  }
+
+  public async verifyUserId (id, grantAccessTo = null): Promise<boolean> {
+    if (grantAccessTo) {
+      for (let role of grantAccessTo) {
+        if (await this.checkUserRole(role)) {
+          return true
+        }
+      }
+    }
+    const user = await this.getUser()
+    if (id && user && Number(user.id) === Number(id)) {
+      return true
+    } else {
+      let error =  new Error('Forbidden')
+      error.statusCode = 403
+      throw error
+    }
+  }
+
+  public async loginById (id): void {
+    if (process.env.NODE_ENV === 'test') {
+      this.user = await User.query().eager('roles').findById(Number(id))
+      return
+    }
   }
 }
 
