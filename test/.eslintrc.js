@@ -24,6 +24,7 @@ module.exports = {
       // "extends": ["plugin:jest/recommended"]
       plugins: ["jest"],
       rules: {
+        "eol-last": ["error", "always"],
         "semi": ["error", "never"],
         "jest/no-disabled-tests": "warn",
         "jest/no-focused-tests": "error",

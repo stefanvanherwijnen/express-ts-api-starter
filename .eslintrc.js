@@ -11,6 +11,7 @@ module.exports = {
         "SharedArrayBuffer": "readonly"
     },
     "rules": {
+        "eol-last": ["error", "always"],
         "quotes": ["error", "single"],
         "semi": ["error", "never"],
         "indent": "off",
