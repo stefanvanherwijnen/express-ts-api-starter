@@ -12,6 +12,7 @@ export default (roleGuard: string[]): Function => {
         req.roles.push(roleGuard[i])
       } else {
         res.status(403).json({errors: {title: 'Forbidden'}})
+        return
       }
     }
     if (req.roles.length) {

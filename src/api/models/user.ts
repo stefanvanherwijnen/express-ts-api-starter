@@ -66,6 +66,7 @@ export default class User extends Model {
   public verified?: boolean
   public verificationToken?: string
   public passwordResetTokenn?: string
+  public tokensRevokedAt: string
   public roles: Role[]
   public roleNames: string[]
 
@@ -82,6 +83,7 @@ export default class User extends Model {
       verified: { type: 'boolean' },
       verificationToken: { type: 'string' },
       passwordResetToken: { type: 'string' },
+      tokensRevokedAt: { type: 'string', format: 'date-time' },
       roleNames: { type: 'array' },
     },
   }

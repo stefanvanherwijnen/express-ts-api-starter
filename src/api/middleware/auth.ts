@@ -5,14 +5,8 @@ export default async function(req, res, next): Promise<void> {
   //   next()
   //   return
   // }
-  const user = await PasetoAuth.getUser()
-  if (user) {
-    next()
-    return
-  }
   if (req.header('Authorization') !== undefined) {
-    PasetoAuth.setRequest(req)
-    const authorized = await PasetoAuth.check()
+    const authorized = await PasetoAuth.check(req)
     if (authorized) {
       next()
       return

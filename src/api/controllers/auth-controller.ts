@@ -186,7 +186,7 @@ export class Controller {
 
 
       const user = await User.query().eager('roles').findOne('email', credentials.email)
-      const token = await PasetoAuth.login(credentials)
+      const token = await PasetoAuth.login(user, credentials)
       if (user) {
         if (!user.verified) {
           res.status(401).send()
@@ -239,7 +239,9 @@ export class Controller {
         await User.query().patch({
           // @ts-ignore
           // eslint-disable-next-line
-          password_reset_token: token
+          password_reset_token: token,
+          // eslint-disable-next-line
+          tokens_revoked_at: new Date().toISOString()
         }).where('email', req.body.email).throwIfNotFound()
         if (process.env.NODE_ENV === 'test') {
           res.send({passwordResetToken: token})

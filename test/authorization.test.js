@@ -7,7 +7,7 @@ import PasetoAuth from '../src/api/helpers/paseto-auth'
 
 var app = (new appConfig).router(routes)
 var server = app.create()
-let request = supertest(server)
+let request = supertest.agent(server)
 
 describe('authorization', () => {
   afterAll(() => {
@@ -16,12 +16,14 @@ describe('authorization', () => {
 
   var user
   it('should login as user', async (done) => {
-    await PasetoAuth.loginById(2)
-    user = await PasetoAuth.getUser()
+    const token = await PasetoAuth.loginById(2)
+    request.set('Authorization', 'Bearer ' + token)
+
     done()
   })
 
   describe('authorized', () => {
+    
   })
 
   describe('unauthorized', () => {

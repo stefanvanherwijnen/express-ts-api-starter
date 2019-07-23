@@ -11,7 +11,7 @@ import './helpers/transactional_tests'
 
 var app = (new appConfig).router(routes)
 var server = app.create()
-let request = supertest(server)
+let request = supertest.agent(server)
 
 describe('user', () => {
   afterAll(() => {
@@ -32,8 +32,11 @@ describe('user', () => {
   data.data.attributes.password = 'passwordtest'
 
   describe('jsonapi', () => {
-    it('should login as admin', async () => {
-      await PasetoAuth.loginById(1)
+    it('should login as admin', async (done) => {
+      const token = await PasetoAuth.loginById(1)
+      request.set('Authorization', 'Bearer ' + token)
+
+      done()
     })
 
     JsonApiTest(request, '/users', 'user', data, updatedData)

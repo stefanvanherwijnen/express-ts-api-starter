@@ -2,29 +2,20 @@ import bcrypt from 'bcrypt'
 import { Request } from 'express'
 import Paseto from 'paseto.js'
 import User from '../models/user'
+import httpContext from 'express-http-context'
 
-import { JsonToken, Rules } from 'paseto.js'
+import { Rules } from 'paseto.js'
 
 class PasetoAuth {
-  public user: User
-  public token: JsonToken
-  public request: Request
-
-  public constructor() {
-    this.user = null
-    this.token = null
-  }
-
   /**
    * Generate aa token if the user exists
    * @param  {string}} credentials [description]
    * @return {Promise}              [description]
    */
-  public async login(credentials: {email: string, password: string}): Promise<string|boolean> {
-    this.user = await User.query().eager('roles').findOne('email', credentials.email)
-
-    if (this.user && this.user.verified && this.validateByCredentials(credentials)) {
-      const token = this.generateTokenForuser()
+  public async login(user, credentials: {email: string, password: string}): Promise<string|boolean> {
+    if (user && this.validateByCredentials(user, credentials)) {
+      const token = this.generateTokenForuser(user)
+      httpContext.set('user', user)
       return token
     }
     return false
@@ -35,25 +26,30 @@ class PasetoAuth {
    * @param  {string}} credentials [description]
    * @return {boolean}              [description]
    */
-  public validateByCredentials(credentials: {email: string, password: string}): boolean {
-    return bcrypt.compareSync(credentials.password, this.user.password)
+  public validateByCredentials(user, credentials: {email: string, password: string}): boolean {
+    return bcrypt.compareSync(credentials.password, user.password)
   }
 
   /**
    * Check if the request has a valid token
    * @return {Promise<boolean>} [description]
    */
-  public async check(): Promise<boolean> {
+  public async check(req: Request): Promise<boolean> {
     let parser = new Paseto.Parser(await this.getSharedKey())
-
     parser = parser.addRule(new Rules.notExpired()).addRule(new Rules.issuedBy(this.getIssuer()))
     try {
-      this.token = await parser.parse(this.getTokenFromRequest())
-      const id = this.token.getClaims().id
+      const token = await parser.parse(this.getTokenFromRequest(req))
+      httpContext.set('token', token)
+
+      const id = token.getClaims().id
       const user = await User.query().eager('roles').findById(id).throwIfNotFound()
+      const iat = token.getClaims().iat
 
       if (user) {
-        this.user = user
+        if (user.tokensRevokedAt && (new Date(iat) < new Date(user.tokensRevokedAt))) {
+          return false
+        }
+        httpContext.set('user', user)
       } else {
         return false
       }
@@ -71,13 +67,14 @@ class PasetoAuth {
     return new Paseto.Builder()
       .setPurpose('local')
       .setKey(await this.getSharedKey())
+      .setIssuedAt(new Date())
       .setExpiration(this.getExpireTime())
       .setIssuer(this.getIssuer())
   }
 
-  public async generateTokenForuser(): Promise<string> {
+  public async generateTokenForuser(user): Promise<string> {
     const claims = {
-      id: this.user.id
+      id: user.id
     }
     const token = await this.getTokenBuilder()
     token.setClaims(claims)
@@ -102,31 +99,31 @@ class PasetoAuth {
     return process.env.PASETO_ISSUER
   }
 
-  public setRequest(request: Request): void {
-    this.request = request
+  public getTokenFromRequest(req): string {
+    return req.header('Authorization').replace('Bearer ', '')
   }
 
-  public getTokenFromRequest(): string {
-    return this.request.header('Authorization').replace('Bearer ', '')
-  }
+  public async getUser(req): Promise<User> {
+    let user = httpContext.get('user')
+    const token = httpContext.get('token')
 
-  public async getUser(): Promise<User> {
-    if (!this.user) {
-      if (this.token) {
-        const claims = this.token.getClaims()
-        const user = await User.query().eager('roles').findById(claims.id).throwIfNotFound()
-        this.user = user
+    if (!user) {
+      if (token) {
+        const claims = token.getClaims()
+        user = await User.query().eager('roles').findById(claims.id).throwIfNotFound()
+        httpContext.set('user', user)
         return user
       }
     } else {
-      return this.user
+      return user
     }
   }
 
   public async checkUserRole (role): Promise<boolean> {
-    if (this.user) {
-      this.user = await this.user.$loadRelated('roles')
-      if (this.user.roleNames.includes(role)) {
+    let user = httpContext.get('user')
+    if (user) {
+      user = await user.$loadRelated('roles')
+      if (user.roleNames.includes(role)) {
         return true
       }
     }
@@ -153,8 +150,9 @@ class PasetoAuth {
 
   public async loginById (id): void {
     if (process.env.NODE_ENV === 'test') {
-      this.user = await User.query().eager('roles').findById(Number(id))
-      return
+      const user = await User.query().eager('roles').findById(Number(id))
+      const token = this.generateTokenForuser(user)
+      return token
     }
   }
 }

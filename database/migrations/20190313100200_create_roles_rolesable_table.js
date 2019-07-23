@@ -8,5 +8,9 @@ exports.up = function(knex, Promise) {
 }
 
 exports.down = function(knex, Promise) {
+  knex.schema.table('roles_roleable', function (table) {
+    table.dropForeign('role_id')
+    table.dropForeign('user_id')
+  })
   return knex.schema.dropTable('roles_roleable')
 }
