@@ -16,14 +16,18 @@ describe('authorization', () => {
 
   var user
   it('should login as user', async (done) => {
-    const token = await PasetoAuth.loginById(2)
-    request.set('Authorization', 'Bearer ' + token)
-
-    done()
+      request.post('/auth/login')
+        .send({email: 'user@demo.com', password: 'password'})
+        .expect(200)
+        .then((response) => {
+          let token = response.body.token
+          request.set('Authorization', 'Bearer ' + token)
+          done()
+        })
   })
 
   describe('authorized', () => {
-    
+
   })
 
   describe('unauthorized', () => {

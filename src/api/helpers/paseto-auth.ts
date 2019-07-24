@@ -147,14 +147,6 @@ class PasetoAuth {
       throw error
     }
   }
-
-  public async loginById (id): void {
-    if (process.env.NODE_ENV === 'test') {
-      const user = await User.query().eager('roles').findById(Number(id))
-      const token = this.generateTokenForuser(user)
-      return token
-    }
-  }
 }
 
 export default new PasetoAuth()

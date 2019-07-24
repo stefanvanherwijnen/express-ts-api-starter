@@ -33,10 +33,14 @@ describe('user', () => {
 
   describe('jsonapi', () => {
     it('should login as admin', async (done) => {
-      const token = await PasetoAuth.loginById(1)
-      request.set('Authorization', 'Bearer ' + token)
-
-      done()
+      request.post('/auth/login')
+        .send({email: 'admin@demo.com', password: 'password'})
+        .expect(200)
+        .then((response) => {
+          let token = response.body.token
+          request.set('Authorization', 'Bearer ' + token)
+          done()
+        })
     })
 
     JsonApiTest(request, '/users', 'user', data, updatedData)
