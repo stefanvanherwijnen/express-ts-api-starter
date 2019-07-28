@@ -2,7 +2,6 @@ import bcrypt from 'bcrypt'
 import { Request } from 'express'
 import Paseto from 'paseto.js'
 import User from '../models/user'
-import httpContext from 'express-http-context'
 
 import { Rules } from 'paseto.js'
 
@@ -15,7 +14,6 @@ class PasetoAuth {
   public async login(user, credentials: {email: string, password: string}): Promise<string|boolean> {
     if (user && this.validateByCredentials(user, credentials)) {
       const token = this.generateTokenForuser(user)
-      httpContext.set('user', user)
       return token
     }
     return false
@@ -39,7 +37,7 @@ class PasetoAuth {
     parser = parser.addRule(new Rules.notExpired()).addRule(new Rules.issuedBy(this.getIssuer()))
     try {
       const token = await parser.parse(this.getTokenFromRequest(req))
-      httpContext.set('token', token)
+      req.token = token
 
       const id = token.getClaims().id
       const user = await User.query().eager('roles').findById(id).throwIfNotFound()
@@ -49,11 +47,12 @@ class PasetoAuth {
         if (user.tokensRevokedAt && (new Date(iat) < new Date(user.tokensRevokedAt))) {
           return false
         }
-        httpContext.set('user', user)
+        req.user = user
       } else {
         return false
       }
     } catch (error) {
+      throw error
       return false
     }
     return true
@@ -104,14 +103,14 @@ class PasetoAuth {
   }
 
   public async getUser(req): Promise<User> {
-    let user = httpContext.get('user')
-    const token = httpContext.get('token')
+    let user = req.user
+    const token = req.token
 
     if (!user) {
       if (token) {
         const claims = token.getClaims()
         user = await User.query().eager('roles').findById(claims.id).throwIfNotFound()
-        httpContext.set('user', user)
+        req.user = user
         return user
       }
     } else {
@@ -119,8 +118,7 @@ class PasetoAuth {
     }
   }
 
-  public async checkUserRole (role): Promise<boolean> {
-    let user = httpContext.get('user')
+  public async checkUserRole (user, role): Promise<boolean> {
     if (user) {
       user = await user.$loadRelated('roles')
       if (user.roleNames.includes(role)) {
@@ -130,15 +128,14 @@ class PasetoAuth {
     return false
   }
 
-  public async verifyUserId (id, grantAccessTo = null): Promise<boolean> {
+  public async verifyUserId (user, id, grantAccessTo = null): Promise<boolean> {
     if (grantAccessTo) {
       for (const role of grantAccessTo) {
-        if (await this.checkUserRole(role)) {
+        if (await this.checkUserRole(user, role)) {
           return true
         }
       }
     }
-    const user = await this.getUser()
     if (id && user && Number(user.id) === Number(id)) {
       return true
     } else {

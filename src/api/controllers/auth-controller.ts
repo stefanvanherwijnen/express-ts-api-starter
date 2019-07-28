@@ -228,7 +228,7 @@ export class Controller {
   *         $ref: '#/components/responses/UnauthorizedError'
   */
   public async getUser(req, res): Promise<void> {
-    const user: object = await PasetoAuth.getUser()
+    const user: object = await PasetoAuth.getUser(req)
     res.send(await JsonSerializer.serialize('user', user))
   }
 

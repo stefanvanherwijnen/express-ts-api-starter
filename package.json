@@ -25,7 +25,6 @@
     "envfile": "^3.0.0",
     "esm": "^3.2.22",
     "express": "^4.16.4",
-    "express-http-context": "^1.2.3",
     "faker": "^4.1.0",
     "i18n": "^0.8.3",
     "is-email": "^1.0.0",

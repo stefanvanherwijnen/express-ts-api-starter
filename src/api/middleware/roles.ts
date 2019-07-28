@@ -7,8 +7,9 @@ export default (roleGuard: string[]): Function => {
     //   return
     // }
     req.roles = []
+    const user = req.user
     for (let i = 0; i < roleGuard.length; i++) {
-      if (await PasetoAuth.checkUserRole(roleGuard[i])) {
+      if (await PasetoAuth.checkUserRole(user, roleGuard[i])) {
         req.roles.push(roleGuard[i])
       } else {
         res.status(403).json({errors: {title: 'Forbidden'}})

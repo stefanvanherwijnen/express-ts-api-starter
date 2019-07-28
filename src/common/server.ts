@@ -10,7 +10,6 @@ import l from './logger'
 import swagger from './swagger'
 import morgan from 'morgan'
 import cors from 'cors'
-import httpContext from 'express-http-context'
 
 import i18n from 'i18n'
 i18n.configure({
@@ -37,7 +36,6 @@ export default class ExpressServer {
     app.use(Express.static(`${root}/public`))
     app.use(i18n.init)
     app.use(cors())
-    app.use(httpContext.middleware)
   }
 
   public swaggerUi(): ExpressServer {
