@@ -7,8 +7,6 @@ import PasetoAuth from '../src/api/helpers/paseto-auth'
 
 import { JsonApiTest } from './jsonapi'
 
-import './helpers/transactional_tests'
-
 var app = (new appConfig).router(routes)
 var server = app.create()
 let request = supertest.agent(server)
@@ -25,7 +23,6 @@ describe('user', () => {
   }
   const data = JSON.parse(JSON.stringify(JsonSerializer.serialize('user', user)))
   const updatedData = JSON.parse(JSON.stringify(data))
-  updatedData.data.id = '1'
   updatedData.data.attributes.name = 'UpdatedName'
 
   data.data.attributes.email = 'test123@123test.test'

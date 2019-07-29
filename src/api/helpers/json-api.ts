@@ -58,14 +58,14 @@ export async function serialize(req, results, schema, customSchema = null): Prom
   return response
 }
 
-export async function paginate(req, model): Promise<object> {
+export async function paginate(req, model, context = null): Promise<object> {
   req.parsedUrl = req.parsedUrl ? req.parsedUrl :parseUrl(req)
 
   const page = req.parsedUrl.queryParameters.page.number
   const pageSize = req.parsedUrl.queryParameters.page.size
   const filter = req.parsedUrl.queryParameters.filter
 
-  const query = model.query().eager(req.parsedUrl.queryParameters.include)
+  const query = model.query().mergeContext(context).eager(req.parsedUrl.queryParameters.include)
   if (typeof filter === 'object') {
     for (const field in filter) {
       query.where(field, 'like', '%' + filter[field] + '%')
@@ -75,14 +75,14 @@ export async function paginate(req, model): Promise<object> {
   return results
 }
 
-export async function readResource(req, model): Promise<object> {
+export async function readResource(req, model, context = null): Promise<object> {
   req.parsedUrl = req.parsedUrl ? req.parsedUrl :parseUrl(req)
 
-  const result = await model.query().eager(req.parsedUrl.queryParameters.include).findById(req.params.id).throwIfNotFound()
+  const result = await model.query().mergeContext(context).eager(req.parsedUrl.queryParameters.include).findById(req.params.id).throwIfNotFound()
   return result
 }
 
-export async function patchResource(req, model, data, options = null): Promise<object> {
+export async function patchResource(req, model, data, context = null, options = null): Promise<object> {
   options = options ? options : {
     relate: true,
     unrelate: true
@@ -90,12 +90,12 @@ export async function patchResource(req, model, data, options = null): Promise<o
   data.id = Number(data.id)
 
   req.parsedUrl = req.parsedUrl ? req.parsedUrl :parseUrl(req)
-  const result = await model.query().eager(req.parsedUrl.queryParameters.include).upsertGraph(data, options)
+  const result = await model.query().mergeContext(context).eager(req.parsedUrl.queryParameters.include).upsertGraph(data, options)
 
   return result
 }
 
-export async function createResource(req, model, data): Promise<object> {
+export async function createResource(req, model, data, context = null): Promise<object> {
   const options = {
     relate: true,
     unrelate: true
@@ -103,16 +103,17 @@ export async function createResource(req, model, data): Promise<object> {
   delete data.id
 
   req.parsedUrl = req.parsedUrl ? req.parsedUrl :parseUrl(req)
-  const result = await model.query().eager(req.parsedUrl.queryParameters.include).insertGraph(data, options)
+  const result = await model.query().mergeContext(context).eager(req.parsedUrl.queryParameters.include).insertGraph(data, options)
   return result
 }
 
-export async function deleteResource(req, model): Promise<boolean> {
+export async function deleteResource(req, model, context = null): Promise<boolean> {
   req.parsedUrl = req.parsedUrl ? req.parsedUrl :parseUrl(req)
 
-  const deletedRows = await model.query().eager(req.parsedUrl.queryParameters.include).findById(req.params.id)
-  if (deletedRows) {
-    await deletedRows.$query().delete()
+  const rowToDelete = await model.query().mergeContext(context).eager(req.parsedUrl.queryParameters.include).findById(req.params.id)
+  if (rowToDelete) {
+    await rowToDelete.$query().mergeContext(context).delete()
+    return true
   }
-  return deletedRows ? true : false
+  return false
 }

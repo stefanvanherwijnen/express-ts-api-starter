@@ -1,8 +1,14 @@
 export function JsonApiTest(request, baseUrl, schema, data, updatedData) {
+  var id
+
   it('should be able to create on POST ', done => {
     request.post(baseUrl + '')
       .send(data)
-      .expect(200, done)
+      .expect(200)
+      .then((response) => {
+        id = response.body.data.id
+        done()
+      })
   })
 
   it('should be able to retrieve on GET with an id', done => {
@@ -15,6 +21,7 @@ export function JsonApiTest(request, baseUrl, schema, data, updatedData) {
   })
 
   it('should be able to update on PATCH', done => {
+    updatedData.data.id = id
     request.patch(baseUrl + '')
       .set('Content-Type', 'application/json')
       .send(updatedData)
@@ -35,7 +42,7 @@ export function JsonApiTest(request, baseUrl, schema, data, updatedData) {
   })
 
   it('should be able to delete on DELETE', done => {
-    request.delete(baseUrl + '/1')
+    request.delete(baseUrl + '/' + id)
       .expect(200, done)
   })
 
