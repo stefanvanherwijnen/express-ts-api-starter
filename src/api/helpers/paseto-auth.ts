@@ -37,7 +37,7 @@ class PasetoAuth {
     parser = parser.addRule(new Rules.notExpired()).addRule(new Rules.issuedBy(this.getIssuer()))
     try {
       const token = await parser.parse(this.getTokenFromRequest(req))
-      req.token = token
+      Object.assign(req, {token: token})
 
       const id = token.getClaims().id
       const user = await User.query().eager('roles').findById(id).throwIfNotFound()
@@ -47,12 +47,11 @@ class PasetoAuth {
         if (user.tokensRevokedAt && (new Date(iat) < new Date(user.tokensRevokedAt))) {
           return false
         }
-        req.user = user
+        Object.assign(req, {user: user})
       } else {
         return false
       }
     } catch (error) {
-      throw error
       return false
     }
     return true
@@ -110,7 +109,8 @@ class PasetoAuth {
       if (token) {
         const claims = token.getClaims()
         user = await User.query().eager('roles').findById(claims.id).throwIfNotFound()
-        req.user = user
+        Object.assign(req, {user: user})
+
         return user
       }
     } else {
