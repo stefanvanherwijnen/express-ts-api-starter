@@ -7,9 +7,9 @@ import JsonSerializer from '../helpers/json-serializer'
 
 const jsonSerializerConfig = {
   jsonapiObject: false,
-  whitelistOnDeserialize: ['id', 'name', 'email'],
+  whitelistOnDeserialize: ['id', 'password', 'name', 'email'],
+  unconvertCase: 'camelCase',
   convertCase: 'camelCase',
-  unconvertCase: 'snake_case',
   relationships: {
     roles: {
       type: 'role',
@@ -36,7 +36,7 @@ const jsonSerializerConfig = {
 }
 
 JsonSerializer.register('user', {
-  ...jsonSerializerConfig, blacklist: ['password', 'verificationToken', 'verified', 'passwordResetToken', 'createdAt', 'updatedAt']
+  ...jsonSerializerConfig, blacklist: ['password', 'verificationToken', 'verified', 'passwordResetToken',  'tokensRevokedAt', 'createdAt', 'updatedAt']
 })
 
 JsonSerializer.register('user', 'superuser', {
@@ -50,10 +50,10 @@ const struct = superstruct({
 })
 
 export const UserStruct = struct({
-  id: 'number?',
+  id: 'string?',
   name: 'string',
   email: 'email',
-  password: 'string',
+  password: 'string?',
   roles: 'object|array|null?'
 })
 

@@ -1,9 +1,30 @@
-import {default as User } from '../models/user'
+import {default as User, UserStruct } from '../models/user'
 import JsonSerializer from '../helpers/json-serializer'
 import databaseErrorHandler from '../helpers/database-error-handler'
 import { serialize, paginate, createResource, readResource, patchResource, deleteResource } from '../helpers/json-api'
 import bcrypt from 'bcrypt'
 
+/**
+* @swagger
+* components:
+*  schemas:
+*    User:
+*      type: object
+*      required:
+*      - email
+*      - password
+*      - name
+*      properties:
+*        email:
+*          type: string
+*          format: email
+*        password:
+*          type: string
+*          format: password
+*          writeOnly: true
+*        name:
+*          type: string
+*/
 class Controller {
   /**
   * @swagger
@@ -101,14 +122,20 @@ class Controller {
   *                      type: object
   *      '400':
   *        description: Database error
-  *      '404':
-  *        description: User was not found.
+  *      '422':
+  *        description: Unprocessable entity
   */
   public async create(req, res): Promise<void> {
     try {
       const password = req.body.data.attributes.password ? await bcrypt.hash(req.body.data.attributes.password, 10) : undefined
 
       const data = await JsonSerializer.deserializeAsync('user', req.body)
+      try {
+        UserStruct(data)
+      } catch (err) {
+        res.status(422).send(JsonSerializer.serializeError(err))
+        return
+      }
       data.password = password
 
       const result = await createResource(req, User, data)
@@ -224,10 +251,19 @@ class Controller {
   *        description: Database error
   *      '404':
   *        description: User was not found.
+  *      '422':
+  *        description: Unprocessable entity
   */
   public async update(req, res): Promise<void> {
     try {
       const data = await JsonSerializer.deserializeAsync('user', req.body)
+
+      try {
+        UserStruct(data)
+      } catch (err) {
+        res.status(422).send(JsonSerializer.serializeError(err))
+        return
+      }
 
       if (data.password) {
         data.password = await bcrypt.hash(data.password, 10)
