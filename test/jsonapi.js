@@ -28,7 +28,7 @@ export function JsonApiTest(request, baseUrl, schema, data, updatedData) {
       .expect(200)
       .expect('Content-Type', /json/)
       .then(response => {
-        expect(response.body).toMatchObject(updatedData)
+        expect(response.body.data.attributes).toMatchObject(updatedData.data.attributes)
         done()
       })
   })

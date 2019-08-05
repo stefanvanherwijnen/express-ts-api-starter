@@ -90,7 +90,7 @@ export async function patchResource(req, model, data, context = null, options = 
   data.id = Number(data.id)
 
   req.parsedUrl = req.parsedUrl ? req.parsedUrl :parseUrl(req)
-  const result = await model.query().mergeContext(context).eager(req.parsedUrl.queryParameters.include).upsertGraph(data, options)
+  const result = await model.query().mergeContext(context).eager(req.parsedUrl.queryParameters.include).upsertGraphAndFetch(data, options)
 
   return result
 }
@@ -103,7 +103,7 @@ export async function createResource(req, model, data, context = null): Promise<
   delete data.id
 
   req.parsedUrl = req.parsedUrl ? req.parsedUrl :parseUrl(req)
-  const result = await model.query().mergeContext(context).eager(req.parsedUrl.queryParameters.include).insertGraph(data, options)
+  const result = await model.query().mergeContext(context).eager(req.parsedUrl.queryParameters.include).insertGraphAndFetch(data, options)
   return result
 }
 

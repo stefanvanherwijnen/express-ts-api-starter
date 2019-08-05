@@ -50,7 +50,7 @@ const struct = superstruct({
 })
 
 export const UserStruct = struct({
-  id: 'string?',
+  id: 'number|string?',
   name: 'string',
   email: 'email',
   password: 'string?',

@@ -1,5 +1,3 @@
-const bcrypt = require('bcrypt');
-
 exports.seed = function(knex, Promise) {
   return knex('roles').del()
   .then(function () {

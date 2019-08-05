@@ -1,4 +1,4 @@
-const faker = require('faker')
+import faker from 'faker'
 
 const createFakeUser = () => (
   {

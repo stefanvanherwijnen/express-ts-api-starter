@@ -1,4 +1,4 @@
-const bcrypt = require('bcrypt');
+import bcrypt from 'bcrypt'
 
 exports.seed = function(knex, Promise) {
   return knex('users').del()
