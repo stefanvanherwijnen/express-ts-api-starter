@@ -1,7 +1,7 @@
 import bcrypt from 'bcrypt'
 import { Request } from 'express'
 import Paseto from 'paseto.js'
-import User from '../models/user'
+import { Model as User } from '../models/user'
 
 import { Rules } from 'paseto.js'
 

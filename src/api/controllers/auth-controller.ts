@@ -1,7 +1,7 @@
 import bcrypt from 'bcrypt'
 import randomstring from 'randomstring'
 import PasetoAuth from '../helpers/paseto-auth'
-import {default as User, UserStruct } from '../models/user'
+import { Model as User, Struct as UserStruct } from '../models/user'
 import mailer from '../../common/email'
 import JsonSerializer from '../helpers/json-serializer'
 import databaseErrorHandler from '../helpers/database-error-handler'

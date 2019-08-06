@@ -1,10 +1,13 @@
 import express from 'express'
-import AuthController from './api/controllers/auth-controller'
-import UsersController from './api/controllers/users-controller'
 import JsonSerializer from './api/helpers/json-serializer'
 
 import authMiddleware from './api/middleware/auth'
 import roleMiddleware from './api/middleware/roles'
+
+import AuthController from './api/controllers/auth-controller'
+
+import { index, create, read, update, deletion } from './api/controllers/json-api-controller'
+import User from './api/models/user'
 
 async function jsonApiPayload (req, res, next): Promise<void> {
   if (Object.prototype.hasOwnProperty.call(req.body, 'data')) {
@@ -14,6 +17,14 @@ async function jsonApiPayload (req, res, next): Promise<void> {
   }
 }
 
+function JsonApiRoutes (resource): express.Router {
+  return express.Router()
+    .get('/', index(resource.model, resource.schema))
+    .post('/', jsonApiPayload, create(resource.model, resource.schema, resource.struct))
+    .get('/:id', read(resource.model, resource.schema))
+    .patch('/', jsonApiPayload, update(resource.model, resource.schema, resource.struct))
+    .delete('/:id', deletion(resource.model))
+}
 
 /**
  * @swagger
@@ -60,12 +71,6 @@ async function jsonApiPayload (req, res, next): Promise<void> {
  *    ForbiddenError:
  *      description: User does not have the correct permissions
  */
-const userRoutes = express.Router()
-  .get('/', UsersController.index)
-  .post('/', jsonApiPayload, UsersController.create)
-  .get('/:id', UsersController.read)
-  .patch('/', jsonApiPayload, UsersController.update)
-  .delete('/:id', UsersController.delete)
 
 const authRoutes = express.Router()
   .post('/login', AuthController.login)
@@ -78,6 +83,6 @@ const authRoutes = express.Router()
 
 export default function routes(app): void {
   app.use('/auth', authRoutes)
-  app.use('/users', authMiddleware, roleMiddleware(['superuser']), userRoutes)
+  app.use('/users', authMiddleware, roleMiddleware(['superuser']), JsonApiRoutes(User))
   app.use('/admin', authMiddleware, roleMiddleware(['administrator']), (res, req): void => {res.send('Administrator')})
 }

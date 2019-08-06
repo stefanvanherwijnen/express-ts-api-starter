@@ -3,8 +3,16 @@ import Role from './role'
 import { superstruct } from 'superstruct'
 import isEmail from 'is-email'
 import JsonSerializer from '../helpers/json-serializer'
+const struct = superstruct({
+  types: {
+    email: isEmail,
+  }
+})
 
-
+/*
+  json-api-serializer
+*/
+const schema = 'user'
 const jsonSerializerConfig = {
   jsonapiObject: false,
   whitelistOnDeserialize: ['id', 'password', 'name', 'email'],
@@ -34,22 +42,17 @@ const jsonSerializerConfig = {
     }
   }
 }
-
-JsonSerializer.register('user', {
+JsonSerializer.register(schema, {
   ...jsonSerializerConfig, blacklist: ['password', 'verificationToken', 'verified', 'passwordResetToken',  'tokensRevokedAt', 'createdAt', 'updatedAt']
 })
-
-JsonSerializer.register('user', 'superuser', {
+JsonSerializer.register(schema, 'superuser', {
   ...jsonSerializerConfig, blacklist: ['password', 'passwordResetToken', 'createdAt', 'updatedAt'],
 })
 
-const struct = superstruct({
-  types: {
-    email: isEmail,
-  }
-})
-
-export const UserStruct = struct({
+/*
+  superstruct
+*/
+const Struct = struct({
   id: 'number|string?',
   name: 'string',
   email: 'email',
@@ -57,8 +60,11 @@ export const UserStruct = struct({
   roles: 'object|array|null?'
 })
 
+/*
+  objection
+*/
 // @ts-ignore
-export default class User extends Model {
+class User extends Model {
   public id?: number
   public email: string
   public name?: string
@@ -123,3 +129,6 @@ export default class User extends Model {
     await this.$query().patch({verified: true, verificationToken: '' })
   }
 }
+
+export { User as Model, schema, Struct }
+export default { model: User, schema: schema, struct: Struct }
