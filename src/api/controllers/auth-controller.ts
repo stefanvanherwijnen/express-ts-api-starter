@@ -241,7 +241,7 @@ export class Controller {
           // eslint-disable-next-line
           password_reset_token: token,
           // eslint-disable-next-line
-          tokens_revoked_at: new Date().toISOString()
+          tokens_revoked_at: new Date().toISOString().slice(0, 19).replace('T', ' ')
         }).where('email', req.body.email).throwIfNotFound()
         if (process.env.NODE_ENV === 'test') {
           res.send({passwordResetToken: token})
