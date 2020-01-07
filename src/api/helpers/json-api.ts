@@ -2,6 +2,8 @@ import url from 'url'
 import JsonSerializer from './json-serializer'
 import { Model } from 'objection'
 
+const camelToSnakeCase = str => str.replace(/[A-Z]/g, letter => `_${letter.toLowerCase()}`)
+
 const parseUrl = (req): {
   baseUrl: string,
   queryParameters: {
@@ -46,8 +48,8 @@ function sparseFieldsets(model, query, queryParameter): void {
 } 
 
 export async function serialize(req, results, schema, customSchema = null): Promise<object> {
-  if (req.roles) {
-    req.roles.forEach((role): void => {
+  if (req.user && req.user.roleNames) {
+    req.user.roleNames.forEach((role): void => {
       if (role in JsonSerializer.schemas[schema]) {
         customSchema = role
       }
@@ -86,9 +88,61 @@ export async function paginate(req, model, context = null): Promise<object> {
   const filter = req.parsedUrl.queryParameters.filter
 
   const query = model.query().mergeContext(context).eager(req.parsedUrl.queryParameters.include)
+  // https://www.drupal.org/docs/8/modules/jsonapi/filtering
   if (typeof filter === 'object') {
+    const filters = {}
     for (const field in filter) {
-      query.where(field, 'like', '%' + filter[field] + '%')
+      if ('group' in filter[field]) {
+        if (!filters[field]) {
+          filters[field] = {}
+        }
+        filters[field]['conjunction'] = filter[field]['group']['conjunction']
+      } else if ('condition' in filter[field]) {
+        let label
+        if ('memberOf' in filter[field]['condition']) {
+          label = filter[field]['condition']['memberOf']
+        } else {
+          label = field
+        }
+
+        if (!filters[label]) {
+          filters[label] = {}
+        }
+        if (!filters[label]['filters']) {
+          filters[label]['filters'] = []
+        }
+        filters[label]['filters'] = [
+          ...filters[label]['filters'],
+          {
+            path: filter[field]['condition']['path'],
+            operator: filter[field]['condition']['operator'],
+            value: filter[field]['condition']['value']
+          }
+        ]
+      }
+    }
+
+    for (const label in filters) {
+      const conjunction = ('conjunction' in filters[label]) ? filters[label]['conjunction'] : 'AND"'
+      if (!['OR', 'AND'].includes(conjunction)) {
+        throw new Error('Invalid conjunction ' + conjunction)
+      }
+      for (const groupFilter of filters[label]['filters']) {
+        if (groupFilter['path'].lastIndexOf('.')) {
+          const pathArray = groupFilter['path'].split('.')
+          if (conjunction === 'OR') {
+            query.orWhereExists(model.relatedQuery(camelToSnakeCase(pathArray[0])).where(camelToSnakeCase(pathArray[1]), groupFilter.operator, groupFilter.value))
+          } else {
+            query.whereExists(model.relatedQuery(camelToSnakeCase(pathArray[0])).where(camelToSnakeCase(pathArray[1]), groupFilter.operator, groupFilter.value))
+          }
+        } else {
+          if (conjunction === 'OR') {
+            query.orWhere(camelToSnakeCase(groupFilter.path), groupFilter.operator, groupFilter.value)
+          } else {
+            query.where(camelToSnakeCase(groupFilter.path), groupFilter.operator, groupFilter.value)
+          }
+        }
+      }
     }
   }
   sparseFieldsets(model, query, req.parsedUrl.queryParameters.fields)
