@@ -21,10 +21,10 @@ const jsonSerializerConfig = {
   relationships: {
     roles: {
       type: 'role',
-      deserialize: (data): {id: string} => ({ id: data.id })
+      deserialize: (data): { id: string } => ({ id: data.id })
     }
   },
-  topLevelLinks: function(data, extraData): object {
+  topLevelLinks: function (data, extraData): object {
     if (extraData.topLevelLinks) {
       return {
         self: extraData.topLevelLinks.self,
@@ -34,7 +34,7 @@ const jsonSerializerConfig = {
       }
     }
   },
-  topLevelMeta: function(data, extraData): object {
+  topLevelMeta: function (data, extraData): object {
     if (extraData.topLevelMeta) {
       return {
         total: extraData.topLevelMeta.total
@@ -43,7 +43,7 @@ const jsonSerializerConfig = {
   }
 }
 JsonSerializer.register(schema, {
-  ...jsonSerializerConfig, blacklist: ['password', 'verificationToken', 'verified', 'passwordResetToken',  'tokensRevokedAt', 'createdAt', 'updatedAt']
+  ...jsonSerializerConfig, blacklist: ['password', 'verificationToken', 'verified', 'passwordResetToken', 'tokensRevokedAt', 'createdAt', 'updatedAt']
 })
 JsonSerializer.register(schema, 'superuser', {
   ...jsonSerializerConfig, blacklist: ['password', 'passwordResetToken', 'createdAt', 'updatedAt'],
@@ -109,24 +109,24 @@ class User extends Model {
     },
   }
 
-  public $afterGet(): void {
+  public $afterGet (): void {
     if (this.roles) {
       this.roleNames = this.roles.map((role): string => { return role.name })
     }
   }
 
-  public static get columnNameMappers(): object {
+  public static get columnNameMappers (): object {
     return snakeCaseMappers()
   }
 
-  public async assignRole(name): Promise<void> {
+  public async assignRole (name): Promise<void> {
     const role = await Role.query().findOne('name', name)
     await this.$relatedQuery('roles').relate(role.id)
   }
 
-  public async verify(): Promise<void> {
+  public async verify (): Promise<void> {
     // @ts-ignore
-    await this.$query().patch({verified: true, verificationToken: '' })
+    await this.$query().patch({ verified: true, verificationToken: '' })
   }
 }
 

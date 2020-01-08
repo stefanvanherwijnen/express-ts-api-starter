@@ -1,17 +1,20 @@
 import bcrypt from 'bcrypt'
 import { Request } from 'express'
-import Paseto from 'paseto.js'
+import paseto from 'paseto'
 import { Model as User } from '../models/user'
+import crypto from 'crypto'
 
-import { Rules } from 'paseto.js'
+
+const { V2: { encrypt, decrypt } } = paseto
 
 class PasetoAuth {
   /**
-   * Generate aa token if the user exists
-   * @param  {string}} credentials [description]
-   * @return {Promise}              [description]
+  * Generate aa token if the user exists
+   * @param user
+   * @param credentials 
+   * @return {Promise}
    */
-  public async login(user, credentials: {email: string, password: string}): Promise<string|boolean> {
+  public async login (user, credentials: { email: string, password: string }): Promise<string | boolean> {
     if (user && this.validateByCredentials(user, credentials)) {
       const token = this.generateTokenForuser(user)
       return token
@@ -21,33 +24,33 @@ class PasetoAuth {
 
   /**
    * Check if the email and password are correct
-   * @param  {string}} credentials [description]
-   * @return {boolean}              [description]
+   * @param user 
+   * @param credentials 
+   * @return {boolean}
    */
-  public validateByCredentials(user, credentials: {email: string, password: string}): boolean {
+  public validateByCredentials (user, credentials: { email: string, password: string }): boolean {
     return bcrypt.compareSync(credentials.password, user.password)
   }
 
   /**
    * Check if the request has a valid token
-   * @return {Promise<boolean>} [description]
+   * @param req
+   * @return {Promise<boolean>}
    */
-  public async check(req: Request): Promise<boolean> {
-    let parser = new Paseto.Parser(await this.getSharedKey())
-    parser = parser.addRule(new Rules.notExpired()).addRule(new Rules.issuedBy(this.getIssuer()))
+  public async check (req: Request): Promise<boolean> {
     try {
-      const token = await parser.parse(this.getTokenFromRequest(req))
-      Object.assign(req, {token: token})
+      const key = crypto.createSecretKey(Buffer.from(process.env.PASETO_KEY, 'base64'))
+      const payload = await decrypt(this.getTokenFromRequest(req), key, { issuer: process.env.PASETO_ISSUER })
 
-      const id = token.getClaims().id
+      const id = payload.id
       const user = await User.query().eager('roles').findById(id).throwIfNotFound()
-      const iat = token.getClaims().iat
+      const iat = payload.iat
 
       if (user) {
         if (user.tokensRevokedAt && (new Date(iat) < new Date(user.tokensRevokedAt))) {
           return false
         }
-        Object.assign(req, {user: user})
+        Object.assign(req, { user: user })
       } else {
         return false
       }
@@ -58,50 +61,35 @@ class PasetoAuth {
   }
 
   /**
-   * Create a token builder
-   * @return {Promise<Paseto.Builder>} [description]
+   * Generates an authorization token for an user
+   * @param user
+   * @returns {string}
    */
-  public async getTokenBuilder(): Promise<Paseto.Builder> {
-    return new Paseto.Builder()
-      .setPurpose('local')
-      .setKey(await this.getSharedKey())
-      .setIssuedAt(new Date())
-      .setExpiration(this.getExpireTime())
-      .setIssuer(this.getIssuer())
-  }
-
-  public async generateTokenForuser(user): Promise<string> {
+  public async generateTokenForuser (user): Promise<string> {
+    const key = crypto.createSecretKey(Buffer.from(process.env.PASETO_KEY, 'base64'))
     const claims = {
       id: user.id
     }
-    const token = await this.getTokenBuilder()
-    token.setClaims(claims)
+    const token = await encrypt(claims, key, { expiresIn: process.env.PASETO_EXPIRE_AFTER_HOURS + 'hours', issuer: process.env.PASETO_ISSUER })
 
-    return await token.toString()
+    return token
   }
 
-  public async getSharedKey(): Promise<Paseto.SymmetricKey> {
-    const sharedKey  = new Paseto.SymmetricKey(new Paseto.V2())
-
-    return sharedKey.base64(process.env.PASETO_KEY).then((): Paseto.SymmetricKey => {
-      return sharedKey
-    })
-  }
-
-  public getExpireTime = (): Date => {
-    const time = new Date()
-    return new Date(time.setHours(time.getHours() + Number(process.env.PASETO_EXPIRE_AFTER_HOURS)))
-  }
-
-  public getIssuer = (): string => {
-    return process.env.PASETO_ISSUER
-  }
-
-  public getTokenFromRequest(req): string {
+  /**
+   * Retrieve the authorization token from a request
+   * @param req 
+   * @returns {string}
+   */
+  public getTokenFromRequest (req): string {
     return req.header('Authorization').replace('Bearer ', '')
   }
 
-  public async getUser(req): Promise<User> {
+  /**
+   * Retrieve the authorized user for a request
+   * @param req 
+   * @returns {User}
+   */
+  public async getUser (req): Promise<User> {
     let user = req.user
     const token = req.token
 
@@ -109,7 +97,7 @@ class PasetoAuth {
       if (token) {
         const claims = token.getClaims()
         user = await User.query().eager('roles').findById(claims.id).throwIfNotFound()
-        Object.assign(req, {user: user})
+        Object.assign(req, { user: user })
 
         return user
       }
@@ -118,6 +106,12 @@ class PasetoAuth {
     }
   }
 
+  /**
+   * Check if the user belongs to a role
+   * @param user 
+   * @param role 
+   * @returns {boolean}
+   */
   public async checkUserRole (user, role): Promise<boolean> {
     if (user) {
       user = await user.$loadRelated('roles')
@@ -128,6 +122,13 @@ class PasetoAuth {
     return false
   }
 
+  /**
+   * Verify is the provided user matches the provided id
+   * @param user 
+   * @param id 
+   * @param grantAccessTo 
+   * @returns {boolean}
+   */
   public async verifyUserId (user, id, grantAccessTo = null): Promise<boolean> {
     if (grantAccessTo) {
       for (const role of grantAccessTo) {
@@ -139,7 +140,7 @@ class PasetoAuth {
     if (id && user && Number(user.id) === Number(id)) {
       return true
     } else {
-      const error =  new Error('Forbidden')
+      const error = new Error('Forbidden')
       error.statusCode = 403
       throw error
     }
