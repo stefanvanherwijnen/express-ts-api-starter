@@ -1,8 +1,8 @@
 import Knex from "knex";
 
-const types = require('pg').types
-types.setTypeParser(1700, function (val) {
-  return parseFloat(val);
+import { types } from 'pg'
+types.setTypeParser(1700, function (val): number {
+    return parseFloat(val);
 });
 
 import knexConfig from '../../knexfile.js'

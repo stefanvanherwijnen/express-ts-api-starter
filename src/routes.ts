@@ -10,20 +10,20 @@ import { index, create, read, update, deletion } from './api/controllers/json-ap
 import User from './api/models/user'
 
 async function jsonApiPayload (req, res, next): Promise<void> {
-  if (Object.prototype.hasOwnProperty.call(req.body, 'data')) {
-    next()
-  } else {
-    res.status(422).send(JsonSerializer.serializeError(new Error('JSON API format required.')))
-  }
+    if (Object.prototype.hasOwnProperty.call(req.body, 'data')) {
+        next()
+    } else {
+        res.status(422).send(JsonSerializer.serializeError(new Error('JSON API format required.')))
+    }
 }
 
 function JsonApiRoutes (resource): express.Router {
-  return express.Router()
-    .get('/', index(resource.model, resource.schema))
-    .post('/', jsonApiPayload, create(resource.model, resource.schema, resource.struct))
-    .get('/:id', read(resource.model, resource.schema))
-    .patch('/', jsonApiPayload, update(resource.model, resource.schema, resource.struct))
-    .delete('/:id', deletion(resource.model))
+    return express.Router()
+        .get('/', index(resource.model, resource.schema))
+        .post('/', jsonApiPayload, create(resource.model, resource.schema, resource.struct))
+        .get('/:id', read(resource.model, resource.schema))
+        .patch('/', jsonApiPayload, update(resource.model, resource.schema, resource.struct))
+        .delete('/:id', deletion(resource.model))
 }
 
 /**
@@ -73,16 +73,16 @@ function JsonApiRoutes (resource): express.Router {
  */
 
 const authRoutes = express.Router()
-  .post('/login', AuthController.login)
-  .post('/register', AuthController.register)
-  .get('/verify', AuthController.verify)
-  .get('/user', authMiddleware, AuthController.getUser)
-  .post('/password/forgot', AuthController.passwordForgot)
-  .post('/password/reset', AuthController.passwordReset)
+    .post('/login', AuthController.login)
+    .post('/register', AuthController.register)
+    .get('/verify', AuthController.verify)
+    .get('/user', authMiddleware, AuthController.getUser)
+    .post('/password/forgot', AuthController.passwordForgot)
+    .post('/password/reset', AuthController.passwordReset)
 
 
-export default function routes(app): void {
-  app.use('/auth', authRoutes)
-  app.use('/users', authMiddleware, roleMiddleware(['superuser']), JsonApiRoutes(User))
-  app.use('/admin', authMiddleware, roleMiddleware(['administrator']), (res, req): void => {res.send('Administrator')})
+export default function routes (app): void {
+    app.use('/auth', authRoutes)
+    app.use('/users', authMiddleware, roleMiddleware(['superuser']), JsonApiRoutes(User))
+    app.use('/admin', authMiddleware, roleMiddleware(['administrator']), (_req, res): void => { res.send('Administrator') })
 }
