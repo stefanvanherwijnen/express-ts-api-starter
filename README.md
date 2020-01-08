@@ -84,6 +84,9 @@ Commands:
   user:assign-role [email] [role]  Asign role to user
 ```
 
+## Docker
+Edit `docker-compose.yml` with the correct environment variables and run `docker-compose up` to start the server.
+
 ## Notes
 The API follows the JSON API format (https://jsonapi.org/format/). Use the correct format for all requests, otherwise it will result in errors. The API documentation is automatically generated, however, a copy of the OpenAPI specification is included in swagger.json.
 
@@ -94,8 +97,8 @@ The API follows the JSON API format (https://jsonapi.org/format/). Use the corre
 * [commander](https://github.com/tj/commander.js) - Command line interface.
 * [i18n](https://github.com/mashpie/i18n-node) - Translations.
 * [json-api-serializer](https://github.com/danivek/json-api-serializer) - JSON API compliant data serializer.
-* [paseto.js](https://github.com/sjudson/paseto.js) - PASETO authentication. Currently a forked version in anticipation of the high-level API.
-* [sswagger-jsdoc](https://github.com/Surnet/swagger-jsdoc) - Automatic Swagger documentation from JSDoc.
+* [paseto](https://github.com/panva/paseto) - PASETO authentication.
+* [swagger-jsdoc](https://github.com/Surnet/swagger-jsdoc) - Automatic Swagger documentation from JSDoc.
 * [nodemailer](https://github.com/nodemailer/nodemailer) - Email
 
 ###### Development
