@@ -63,7 +63,7 @@ export class Controller {
   *                      title:
   *                        type: string
   */
-    public async register(req, res): Promise<void> {
+    public async register (req, res): Promise<void> {
         const user: {
             email: string;
             password: string;
@@ -83,12 +83,12 @@ export class Controller {
         }
 
         user.verificationToken = randomstring.generate(64)
-        Object.assign(user, {password: await bcrypt.hash(user.password, 10)})
+        Object.assign(user, { password: await bcrypt.hash(user.password, 10) })
         // user.password = await bcrypt.hash(user.password, 10)
 
         User.query().insert(user).then((): void => {
             if (process.env.NODE_ENV === 'test') {
-                res.send({verificationToken: user.verificationToken})
+                res.send({ verificationToken: user.verificationToken })
             } else {
                 mailer.send({
                     template: process.env.PWD + '/src/common/email/templates/verification',
@@ -100,6 +100,8 @@ export class Controller {
                     }
                 }).then((): void => {
                     res.status(204).send()
+                }).catch((): void => {
+                    res.status(500).send()
                 })
             }
         }).catch((err): void => {
@@ -128,8 +130,8 @@ export class Controller {
   *      '422':
   *        description: Invalid verification token
   */
-    public async verify(req, res): Promise<void> {
-        if (req.query.token)  {
+    public async verify (req, res): Promise<void> {
+        if (req.query.token) {
             const token = req.query.token
             const user = await User.query().where('verification_token', token).where('verified', 0).first()
             if (user) {
@@ -180,12 +182,12 @@ export class Controller {
   *       '403':
   *         description: Invalid credentials
   */
-    public async login(req, res): Promise<void>  {
+    public async login (req, res): Promise<void> {
         if (req.body.email && req.body.password) {
-            const credentials = {email: req.body.email, password: req.body.password}
+            const credentials = { email: req.body.email, password: req.body.password }
 
 
-            const user = await User.query().eager('roles').findOne('email', credentials.email)
+            const user = await User.query().withGraphFetched('roles').findOne('email', credentials.email)
             const token = await PasetoAuth.login(user, credentials)
             if (user) {
                 if (!user.verified) {
@@ -194,7 +196,7 @@ export class Controller {
                 if (token) {
                     const userJson = await JsonSerializer.serialize('user', user)
 
-                    return res.json({user: userJson, token: token})
+                    return res.json({ user: userJson, token: token })
                 }
             }
         }
@@ -227,24 +229,24 @@ export class Controller {
   *       '401':
   *         $ref: '#/components/responses/UnauthorizedError'
   */
-    public async getUser(req, res): Promise<void> {
+    public async getUser (req, res): Promise<void> {
         const user: object = await PasetoAuth.getUser(req)
         res.send(await JsonSerializer.serialize('user', user))
     }
 
-    public async passwordForgot(req, res): Promise<void> {
+    public async passwordForgot (req, res): Promise<void> {
         try {
             if (req.body.email) {
                 const token = randomstring.generate(64)
                 await User.query().patch({
                     // @ts-ignore
                     // eslint-disable-next-line
-          password_reset_token: token,
+                    password_reset_token: token,
                     // eslint-disable-next-line
-          tokens_revoked_at: new Date().toISOString().slice(0, 19).replace('T', ' ')
+                    tokens_revoked_at: new Date().toISOString().slice(0, 19).replace('T', ' ')
                 }).where('email', req.body.email).throwIfNotFound()
                 if (process.env.NODE_ENV === 'test') {
-                    res.send({passwordResetToken: token})
+                    res.send({ passwordResetToken: token })
                 } else {
                     mailer.send({
                         template: process.env.PWD + '/src/common/email/templates/password-forgot',
@@ -266,12 +268,12 @@ export class Controller {
         }
     }
 
-    public async passwordReset(req, res): Promise<void> {
+    public async passwordReset (req, res): Promise<void> {
         try {
             if (req.query.token) {
                 if (req.body.password) {
                     const hash = await bcrypt.hash(req.body.password, 10)
-                    await User.query().patch({password: hash}).where('password_reset_token', req.query.token).throwIfNotFound()
+                    await User.query().patch({ password: hash }).where('password_reset_token', req.query.token).throwIfNotFound()
                     res.status(204).send()
                 } else {
                     res.status(422).send()

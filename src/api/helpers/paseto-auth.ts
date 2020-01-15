@@ -43,7 +43,7 @@ class PasetoAuth {
             const payload = await decrypt(this.getTokenFromRequest(req), key, { issuer: process.env.PASETO_ISSUER })
 
             const id = payload.id
-            const user = await User.query().eager('roles').findById(id).throwIfNotFound()
+            const user = await User.query().withGraphFetched('roles').findById(id).throwIfNotFound()
             const iat = payload.iat
 
             if (user) {
@@ -96,7 +96,7 @@ class PasetoAuth {
         if (!user) {
             if (token) {
                 const claims = token.getClaims()
-                user = await User.query().eager('roles').findById(claims.id).throwIfNotFound()
+                user = await User.query().withGraphFetched('roles').findById(claims.id).throwIfNotFound()
                 Object.assign(req, { user: user })
 
                 return user
@@ -114,7 +114,7 @@ class PasetoAuth {
    */
     public async checkUserRole (user, role): Promise<boolean> {
         if (user) {
-            user = await user.$loadRelated('roles')
+            user = await user.$fetchGraph('roles')
             if (user.roleNames.includes(role)) {
                 return true
             }
