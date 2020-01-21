@@ -62,7 +62,7 @@ function sparseFieldsets (model, query, queryParameter): void {
             if (!fields.includes('id')) {
                 fields.push("id")
             }
-            query.modifyEager((resource, builder): void => {
+            query.modifyGraph((resource, builder): void => {
                 builder.select(fields)
             })
         }
@@ -187,7 +187,6 @@ export async function paginate (req, model, context = null): Promise<object> {
                 }]
             }
         }
-
         for (const label in filters) {
             const conjunction = ('conjunction' in filters[label]) ? filters[label]['conjunction'] : 'AND'
             if (!['OR', 'AND'].includes(conjunction)) {
@@ -203,17 +202,11 @@ export async function paginate (req, model, context = null): Promise<object> {
                             query.whereExists(model.relatedQuery(camelToSnakeCase(pathArray[0])).where(camelToSnakeCase(pathArray[1]), groupFilter.operator, groupFilter.value))
                         }
                     } else if (pathArray.length === 3) {
-                        console.log(pathArray)
-
-                        // todo
-                        // if (conjunction === 'OR') {
-                        //   query.orWhereExists(model.relatedQuery(camelToSnakeCase(pathArray[0])).orderBy('id', 'desc').offset(parseInt(pathArray[1])).limit(1).where(camelToSnakeCase(pathArray[2]), groupFilter.operator, groupFilter.value))
-                        // } else {
-                        // query.select('*', model.relatedQuery(camelToSnakeCase(pathArray[0])).orderBy('id', 'desc').offset(parseInt(pathArray[1])).limit(1).select(camelToSnakeCase(pathArray[2])).as(camelToSnakeCase(pathArray[2]))).having(camelToSnakeCase(pathArray[2]), groupFilter.operator, groupFilter.value)
-                        query.whereExists(model.relatedQuery(camelToSnakeCase(pathArray[0])).orderBy('id', 'desc').offset(parseInt(pathArray[1])).limit(1).select(camelToSnakeCase(pathArray[2])).where(camelToSnakeCase(pathArray[2]), groupFilter.operator, groupFilter.value))
-                        // query.groupBy('id').where('status', groupFilter.operator, groupFilter.value)
-
-                        // }
+                        if (conjunction === 'OR') {
+                            query.orWhereExists(model.relatedQuery(camelToSnakeCase(pathArray[0])).orderBy('id', 'desc').offset(parseInt(pathArray[1])).limit(1).select(camelToSnakeCase(pathArray[2])).where(camelToSnakeCase(pathArray[2]), groupFilter.operator, groupFilter.value))
+                        } else {
+                            query.whereExists(model.relatedQuery(camelToSnakeCase(pathArray[0])).orderBy('id', 'desc').offset(parseInt(pathArray[1])).limit(1).select(camelToSnakeCase(pathArray[2])).where(camelToSnakeCase(pathArray[2]), groupFilter.operator, groupFilter.value))
+                        }
                     }
                 } else {
                     if (conjunction === 'OR') {
@@ -304,16 +297,8 @@ export async function patchResource (
         }
     data.id = Number(data.id)
     req.parsedUrl = req.parsedUrl ? req.parsedUrl : parseUrl(req)
-    const update = await model
-        .query()
-        .context(context)
-        .withGraphFetched(req.parsedUrl.queryParameters.include)
-        .upsertGraph(data, options)
-    const result = await model
-        .query()
-        .context(context)
-        .withGraphFetched(req.parsedUrl.queryParameters.include)
-        .findById(update.id)
+    const instance = await model.query().context(context).withGraphFetched(req.parsedUrl.queryParameters.include).findById(data.id)
+    const result = instance.$query().context(context).patchAndFetch(data)
 
     return result
 }
@@ -357,7 +342,7 @@ export async function fetchRelationship (
         const relation = await instance
             .$relatedQuery(relationship)
             .context(context)
-            .pluck("id")
+            .then(items => items.map(it => it.id))
         return relation
     }
 }
@@ -411,7 +396,7 @@ export async function patchRelationship (
         const relation = await instance
             .$relatedQuery(relationship)
             .context(context)
-            .pluck("id")
+            .then(items => items.map(it => it.id))
         return relation
     }
 }
@@ -438,7 +423,7 @@ export async function relate (
         const relation = await instance
             .$relatedQuery(relationship)
             .context(context)
-            .pluck("id")
+            .then(items => items.map(it => it.id))
         return relation
     }
 }
@@ -466,7 +451,7 @@ export async function unrelate (
         const relation = await instance
             .$relatedQuery(relationship)
             .context(context)
-            .pluck("id")
+            .then(items => items.map(it => it.id))
         return relation
     }
 }
