@@ -62,7 +62,7 @@ function sparseFieldsets (model, query, queryParameter): void {
             if (!fields.includes('id')) {
                 fields.push("id")
             }
-            query.modifyGraph((resource, builder): void => {
+            query.modifyGraph(resource, (builder): void => {
                 builder.select(fields)
             })
         }
