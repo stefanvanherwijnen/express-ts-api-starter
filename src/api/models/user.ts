@@ -1,4 +1,4 @@
-import { Model, snakeCaseMappers } from 'objection'
+import { Model, snakeCaseMappers, RelationMappings, ColumnNameMappers } from 'objection'
 import Role from './role'
 import { superstruct } from 'superstruct'
 import isEmail from 'is-email'
@@ -63,22 +63,21 @@ const Struct = struct({
 /*
   objection
 */
-// @ts-ignore
 class User extends Model {
-    public id?: number
-    public email: string
-    public name?: string
-    public password: string
-    public verified?: boolean
-    public verificationToken?: string
-    public passwordResetTokenn?: string
-    public tokensRevokedAt: string
-    public roles: Role[]
-    public roleNames: string[]
+    id?: number
+    email: string
+    name?: string
+    password: string
+    verified?: boolean
+    verificationToken?: string
+    passwordResetTokenn?: string
+    tokensRevokedAt: string
+    roles: Role[]
+    roleNames: string[]
 
-    public static tableName = 'users'
+    static tableName = 'users'
 
-    public static jsonSchema = {
+    static jsonSchema = {
         type: 'object',
         required: ['email'],
         properties: {
@@ -94,10 +93,10 @@ class User extends Model {
         },
     }
 
-    public static relationMappings = {
+    static relationMappings = (): RelationMappings => ({
         roles: {
             relation: Model.ManyToManyRelation,
-            modelClass: __dirname + '/role',
+            modelClass: Role,
             join: {
                 from: 'users.id',
                 through: {
@@ -106,26 +105,25 @@ class User extends Model {
                 },
                 to: 'roles.id',
             },
-        },
-    }
+        }
+    })
 
-    public $afterGet (): void {
+    $afterFind (): void {
         if (this.roles) {
             this.roleNames = this.roles.map((role): string => { return role.name })
         }
     }
 
-    public static get columnNameMappers (): object {
+    static get columnNameMappers (): ColumnNameMappers {
         return snakeCaseMappers()
     }
 
-    public async assignRole (name): Promise<void> {
+    async assignRole (name): Promise<void> {
         const role = await Role.query().findOne('name', name)
         await this.$relatedQuery('roles').relate(role.id)
     }
 
-    public async verify (): Promise<void> {
-    // @ts-ignore
+    async verify (): Promise<void> {
         await this.$query().patch({ verified: true, verificationToken: '' })
     }
 }

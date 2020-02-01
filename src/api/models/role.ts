@@ -1,4 +1,6 @@
-import { Model } from 'objection'
+import { Model, RelationMappings } from 'objection'
+
+import { Model as User } from './user'
 
 import JsonSerializer from '../helpers/json-serializer'
 
@@ -7,14 +9,13 @@ JsonSerializer.register('role', {
     whitelistOnDeserialize: ['id', 'name']
 })
 
-// @ts-ignore
 export default class Role extends Model {
-    public readonly id?: number
-    public name?: string
+    readonly id?: number
+    name?: string
 
-    public static tableName = 'roles'
+    static tableName = 'roles'
 
-    public static relationMappings = {
+    static relationMappings = (): RelationMappings => ({
         user: {
             join: {
                 from: 'roles.id',
@@ -24,8 +25,9 @@ export default class Role extends Model {
                 },
                 to: 'users.id',
             },
-            modelClass: __dirname + '/user',
+            modelClass: User,
             relation: Model.HasOneRelation,
-        },
+        }
     }
+    )
 }
