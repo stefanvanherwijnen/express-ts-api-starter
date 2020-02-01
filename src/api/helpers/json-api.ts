@@ -298,6 +298,17 @@ export async function patchResource (
     data.id = Number(data.id)
     req.parsedUrl = req.parsedUrl ? req.parsedUrl : parseUrl(req)
     const instance = await model.query().context(context).withGraphFetched(req.parsedUrl.queryParameters.include).findById(data.id)
+    for (const relation in model.relationMappings) {
+        if (data[relation]) {
+            const newIds = data[relation].map(v => v.id)
+            const relatedIds = await instance.$relatedQuery(relation).select('id').then(items => items.map(it => it.id))
+            const remove = relatedIds.filter(v => !newIds.includes(v))
+            const add = newIds.filter(v => !relatedIds.includes(v))
+
+            await instance.$relatedQuery(relation).unrelate().whereIn('id', remove)
+            await instance.$relatedQuery(relation).relate(add)
+        }
+    }
     const result = instance.$query().context(context).patchAndFetch(data)
 
     return result
