@@ -67,12 +67,10 @@ export class Controller {
         const user: {
             email: string;
             password: string;
-            name: string;
             verificationToken?: string;
         } = {
             email: req.body.email,
             password: req.body.password,
-            name: req.body.name
         }
 
         try {

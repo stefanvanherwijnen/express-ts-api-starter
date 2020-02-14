@@ -15,7 +15,7 @@ const struct = superstruct({
 const schema = 'user'
 const jsonSerializerConfig = {
     jsonapiObject: false,
-    whitelistOnDeserialize: ['id', 'password', 'name', 'email'],
+    whitelistOnDeserialize: ['id', 'password', 'email'],
     unconvertCase: 'camelCase',
     convertCase: 'camelCase',
     relationships: {
@@ -54,7 +54,6 @@ JsonSerializer.register(schema, 'superuser', {
 */
 const Struct = struct({
     id: 'number|string?',
-    name: 'string',
     email: 'email',
     password: 'string?',
     roles: 'object|array|null?'
@@ -66,7 +65,6 @@ const Struct = struct({
 class User extends Model {
     id?: number
     email: string
-    name?: string
     password: string
     verified?: boolean
     verificationToken?: string
@@ -83,7 +81,6 @@ class User extends Model {
         properties: {
             id: { type: 'integer' },
             email: { type: 'string', format: 'email' },
-            name: { type: 'string', minLength: 1, maxLength: 255 },
             password: { type: 'string' },
             verified: { type: 'boolean' },
             verificationToken: { type: 'string' },
