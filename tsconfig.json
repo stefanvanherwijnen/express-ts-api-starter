@@ -8,6 +8,11 @@
         "sourceMap": true,
         "outDir": "dist",
         "baseUrl": ".",
+        "paths": {
+            "~/*": [
+                "src/*"
+            ]
+        }
         // "allowJs": true,
     },
     "include": [

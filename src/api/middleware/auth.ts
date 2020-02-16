@@ -1,4 +1,4 @@
-import PasetoAuth from '../helpers/paseto-auth'
+import PasetoAuth from '~/api//helpers/paseto-auth'
 
 export default async function (req, res, next): Promise<void> {
     // if (process.env.TEST_IS_ADMIN && process.env.NODE_ENV === 'test') {

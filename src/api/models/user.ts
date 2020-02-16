@@ -1,8 +1,8 @@
 import { Model, snakeCaseMappers, RelationMappings, ColumnNameMappers } from 'objection'
-import Role from './role'
+import Role from '~/api/models/role'
 import { superstruct } from 'superstruct'
 import isEmail from 'is-email'
-import JsonSerializer from '../helpers/json-serializer'
+import JsonSerializer from '~/api/helpers/json-serializer'
 const struct = superstruct({
     types: {
         email: isEmail,

@@ -2,7 +2,7 @@ import { Model, RelationMappings } from 'objection'
 
 import { Model as User } from './user'
 
-import JsonSerializer from '../helpers/json-serializer'
+import JsonSerializer from '~/api/helpers/json-serializer'
 
 JsonSerializer.register('role', {
     jsonapiObject: false,

@@ -1,10 +1,10 @@
 import bcrypt from 'bcrypt'
 import randomstring from 'randomstring'
-import PasetoAuth from '../helpers/paseto-auth'
-import { Model as User, Struct as UserStruct } from '../models/user'
-import mailer from '../../common/email'
-import JsonSerializer from '../helpers/json-serializer'
-import databaseErrorHandler from '../helpers/database-error-handler'
+import PasetoAuth from '~/api//helpers/paseto-auth'
+import { Model as User, Struct as UserStruct } from '~/api//models/user'
+import mailer from '~/common/email'
+import JsonSerializer from '~/api//helpers/json-serializer'
+import databaseErrorHandler from '~/api/helpers/database-error-handler'
 
 /**
 * @swagger
@@ -15,7 +15,6 @@ import databaseErrorHandler from '../helpers/database-error-handler'
 *      required:
 *      - email
 *      - password
-*      - name
 *      properties:
 *        email:
 *          type: string
@@ -24,8 +23,6 @@ import databaseErrorHandler from '../helpers/database-error-handler'
 *          type: string
 *          format: password
 *          writeOnly: true
-*        name:
-*          type: string
 */
 export class Controller {
     /**

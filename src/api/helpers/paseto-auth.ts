@@ -1,7 +1,7 @@
 import bcrypt from 'bcrypt'
 import { Request } from 'express'
 import paseto from 'paseto'
-import { Model as User } from '../models/user'
+import { Model as User } from '~/api//models/user'
 import crypto from 'crypto'
 
 

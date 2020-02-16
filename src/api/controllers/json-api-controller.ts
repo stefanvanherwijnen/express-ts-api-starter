@@ -1,5 +1,5 @@
-import JsonSerializer from "../helpers/json-serializer"
-import databaseErrorHandler from "../helpers/database-error-handler"
+import JsonSerializer from "~/api//helpers/json-serializer"
+import databaseErrorHandler from "~/api//helpers/database-error-handler"
 import {
     serialize,
     paginate,

@@ -1,13 +1,13 @@
 import express from 'express'
-import JsonSerializer from './api/helpers/json-serializer'
+import JsonSerializer from '~/api/helpers/json-serializer'
 
-import authMiddleware from './api/middleware/auth'
-import roleMiddleware from './api/middleware/roles'
+import authMiddleware from '~/api/middleware/auth'
+import roleMiddleware from '~/api/middleware/roles'
 
-import AuthController from './api/controllers/auth-controller'
+import AuthController from '~/api/controllers/auth-controller'
 
-import { index, create, read, update, deletion } from './api/controllers/json-api-controller'
-import User from './api/models/user'
+import { index, create, read, update, deletion } from '~/api/controllers/json-api-controller'
+import User from '~/api/models/user'
 
 async function jsonApiPayload (req, res, next): Promise<void> {
     if (Object.prototype.hasOwnProperty.call(req.body, 'data')) {
