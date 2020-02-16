@@ -182,7 +182,7 @@ export async function paginate (req, model, context = null): Promise<object> {
                 }
                 filters[field]['filters'] = [{
                     path: field,
-                    operator: 'like',
+                    operator: 'ilike', // postgres only
                     value: '%' + filter[field] + '%'
                 }]
             }
