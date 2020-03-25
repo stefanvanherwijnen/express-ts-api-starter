@@ -15,15 +15,14 @@ describe('user', () => {
   afterAll(() => {
     app.close(server)
   })
-  
+
   const user = {
     email: 'randomuser@user.test',
     password: 'PasswordForTtesting',
-    name: 'NewUser'
   }
   const data = JSON.parse(JSON.stringify(JsonSerializer.serialize('user', user)))
   const updatedData = JSON.parse(JSON.stringify(data))
-  updatedData.data.attributes.name = 'UpdatedName'
+  updatedData.data.attributes.email = 'differentuser@user.test'
 
   data.data.attributes.email = 'test123@123test.test'
   data.data.attributes.password = 'passwordtest'
@@ -31,7 +30,7 @@ describe('user', () => {
   describe('jsonapi', () => {
     it('should login as admin', async (done) => {
       request.post('/auth/login')
-        .send({email: 'admin@demo.com', password: 'password'})
+        .send({ email: 'admin@demo.com', password: 'password' })
         .expect(200)
         .then((response) => {
           let token = response.body.token

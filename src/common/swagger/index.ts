@@ -15,7 +15,7 @@ const options = {
 const swaggerSpec = swaggerJSDoc(options)
 
 export default function (app): void {
-    app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(null, {swaggerUrl: '/swagger.json'}))
+    app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(null, { swaggerUrl: '/swagger.json' }))
     app.get('/swagger.json', (req, res): void => {
         res.setHeader('Content-Type', 'application/json')
         res.send(swaggerSpec)

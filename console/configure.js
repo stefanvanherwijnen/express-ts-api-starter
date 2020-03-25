@@ -1,16 +1,12 @@
 #!/usr/bin/env babel-node --
-import '../src/common/env'
 import program from 'commander'
 import paseto from 'paseto'
 const { V2 } = paseto
 
-import knex from '../src/common/knex'
-import { Model } from 'objection'
-Model.knex(knex)
+import Knex from "knex";
+let knex
 
 import knexConfig from '../knexfile'
-import { Model as User } from '../src/api/models/user.ts'
-
 
 const generateNewKey = async () => {
     const key = await V2.generateKey('local')
@@ -18,7 +14,11 @@ const generateNewKey = async () => {
     console.log(base64.toString('base64'))
 }
 
-const databaseFunctions = async (method, argument) => {
+const databaseFunctions = async (method, options) => {
+    if (options.environment) {
+        knex = Knex(knexConfig[options.environment]);
+        console.log('Using environment: ', options.environment)
+    }
     switch (method) {
         case 'rollback':
             await knex.migrate.rollback({}, true)
@@ -34,11 +34,11 @@ const databaseFunctions = async (method, argument) => {
             console.log('Database has been refreshed')
             break
         case 'seed':
-            const config = knexConfig[process.env.NODE_ENV]
-            if (argument) {
-                console.log('Seeding from folder: ' + argument)
+            const config = knexConfig[options.environment]
+            if (options.folder) {
+                console.log('Seeding from folder: ' + options.folder)
                 const pathArray = config.seeds.directory.split('/')
-                pathArray[pathArray.length - 1] = argument
+                pathArray[pathArray.length - 1] = options.folder
                 config.seeds.directory = pathArray.join('/')
             }
             await knex.seed.run(config)
@@ -50,22 +50,6 @@ const databaseFunctions = async (method, argument) => {
     knex.destroy()
 }
 
-const assignRole = async (email, roleName) => {
-    let user
-    try {
-        user = await User.query()
-            .findOne('email', email)
-            .throwIfNotFound()
-        await user.assignRole(roleName)
-    } catch (err) {
-        console.error(err)
-        knex.destroy()
-        return
-    }
-    knex.destroy()
-    console.log('Role successfully added')
-}
-
 program
     .version('0.0.1')
     .command('generate-key')
@@ -73,38 +57,12 @@ program
     .action(generateNewKey)
 
 program
-    .command('database:migrate')
-    .description('Migrate database')
-    .action(function () {
-        databaseFunctions('migrate')
-    })
-
-program
-    .command('database:rollback')
-    .description('Rollback database')
-    .action(function () {
-        databaseFunctions('rollback')
-    })
-
-program
-    .command('database:refresh')
-    .description('Refresh database')
-    .action(function () {
-        databaseFunctions('refresh')
-    })
-
-program
-    .command('database:seed [folder]')
-    .description('Seed database')
-    .action(function (folder) {
-        databaseFunctions('seed', folder)
-    })
-
-program
-    .command('user:assign-role [email] [role]')
-    .description('Asign role to user')
-    .action(function (email, role) {
-        assignRole(email, role)
+    .command('database <cmd>')
+    .option('-f, --folder <folder>', 'Folder to seed')
+    .requiredOption('-env, --environment <environment>', 'environment')
+    .description('Database functions')
+    .action(async function (cmd, options) {
+        await databaseFunctions(cmd, { environment: options.environment, folder: options.folder })
     })
 
 program.on('command:*', function () {

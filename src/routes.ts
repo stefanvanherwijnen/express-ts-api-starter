@@ -6,7 +6,18 @@ import roleMiddleware from '~/api/middleware/roles'
 
 import AuthController from '~/api/controllers/auth-controller'
 
-import { index, create, read, update, deletion } from '~/api/controllers/json-api-controller'
+import {
+    index,
+    create,
+    read,
+    update,
+    deletion,
+    readRelationship,
+    readRelationshipResource,
+    updateRelationship,
+    createRelationship,
+    deleteRelationship
+} from "~/api/controllers/json-api-controller";
 import User from '~/api/models/user'
 
 async function jsonApiPayload (req, res, next): Promise<void> {
@@ -17,13 +28,62 @@ async function jsonApiPayload (req, res, next): Promise<void> {
     }
 }
 
-function JsonApiRoutes (resource): express.Router {
-    return express.Router()
-        .get('/', index(resource.model, resource.schema))
-        .post('/', jsonApiPayload, create(resource.model, resource.schema, resource.struct))
-        .get('/:id', read(resource.model, resource.schema))
-        .patch('/', jsonApiPayload, update(resource.model, resource.schema, resource.struct))
-        .delete('/:id', deletion(resource.model))
+function JsonApiRoutes (resource, routes = ['index', 'read', 'create', 'update', 'delete', 'readRelationship', 'readRelationshipResource', 'createRelationship', 'updateRelationship', 'deleteRelationship']): express.Router {
+    const router = express.Router()
+    if (routes.includes('index')) {
+        router.get("/", index(resource.model, resource.schema))
+    }
+    if (routes.includes('create')) {
+        router.post(
+            "/",
+            jsonApiPayload,
+            create(resource.model, resource.schema, resource.struct)
+        )
+    }
+    if (routes.includes('read')) {
+        router.get("/:id", read(resource.model, resource.schema))
+    }
+    if (routes.includes('update')) {
+        router.patch(
+            "/",
+            jsonApiPayload,
+            update(resource.model, resource.schema, resource.struct)
+        )
+    }
+    if (routes.includes('delete')) {
+        router.delete("/:id", deletion(resource.model))
+    }
+    if (routes.includes('readRelationship')) {
+        router.get(
+            "/:id/relationships/:relationship",
+            readRelationship(resource.model, resource.schema)
+        )
+    }
+    if (routes.includes('readRelationshipResource')) {
+        router.get(
+            "/:id/:relationship",
+            readRelationshipResource(resource.model, resource.schema)
+        )
+    }
+    if (routes.includes('createRelationship')) {
+        router.post(
+            "/:id/relationships/:relationship",
+            createRelationship(resource.model, resource.schema)
+        )
+    }
+    if (routes.includes('updateRelationship')) {
+        router.patch(
+            "/:id/relationships/:relationship",
+            updateRelationship(resource.model, resource.schema)
+        )
+    }
+    if (routes.includes('readRelationshipResource')) {
+        router.delete(
+            "/:id/relationships/:relationship",
+            deleteRelationship(resource.model, resource.schema)
+        )
+    }
+    return router
 }
 
 /**

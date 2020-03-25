@@ -20,8 +20,8 @@ export default class Role extends Model {
             join: {
                 from: 'roles.id',
                 through: {
-                    from: 'roles_roleable.role_id',
-                    to: 'roles_roleable.user_id',
+                    from: 'user_role.role_id',
+                    to: 'user_role.user_id',
                 },
                 to: 'users.id',
             },

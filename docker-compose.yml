@@ -11,7 +11,7 @@ services:
       PORT: 3000
       LOG_LEVEL: 'info'
       REQUEST_LIMIT: '100kb'
-      PASETO_KEY: 'IaV4CofpHLLe8fJIRHet8/FXb0l+3tveCAiESqeAsu4='
+      PASETO_KEY: 'xu2QHnI7xKFEBHLtchqZCqLGsenq8ZvmbHqY58uLOm8='
       PASETO_ISSUER: 'api'
       PASETO_EXPIRE_AFTER_HOURS: '24'
       MAIL_HOST:
@@ -23,10 +23,7 @@ services:
       FRONTEND_URL: '"http://127.0.0.1:8080'
       VERIFICATION_URL: 'http://127.0.0.1:3000/auth/verify'
       PASSWORD_RESET_URL: 'http://127.0.0.1:8080/#/password/reset'
-    command: yarn dev
-    volumes:
-      - ./src/.:/app/src/
-      - /app/node_modules
+    command: /bin/sh -c "yarn configure database migrate --environment=docker && yarn start"
     ports:
       - "3000:3000"
 

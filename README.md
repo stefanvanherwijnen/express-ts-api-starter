@@ -21,17 +21,17 @@ cp .env.example .env
 Create the databases:
 ```
 touch database/database.db database/test.db
-yarn configure database:migrate
+yarn configure database migrate --environment=development
 ```
 
 Configure the environment variables (.env).
 
 ```
 cp .env.example .env
-```
-Make sure to correct the .env file and finally:
-```
 yarn configure generate-key
+```
+Make sure to correct the .env file with the generated key and finally:
+```
 yarn dev
 ```
 
@@ -41,17 +41,17 @@ Open http://127.0.0.1:3000 in the browser. API documentation is shown on http://
 
 In order to add an 'administrator' and 'superuser' role:
 ```
-yarn configure database:seed setup
+yarn configure database seed setup --environment=development
 ```
 
 To seed the database with fake users:
 ```
-yarn configure database:seed faker
+yarn configure database seed faker --environment=development
 ```
 
 To create a 'demo@demo.com' user with password 'password':
 ```
-yarn configure database:seed data
+yarn configure database seed data --environment=development
 ```
 ### Adding a role to an user
 
@@ -72,16 +72,13 @@ yarn test
 Usage: configure [options] [command]
 
 Options:
-  -V, --version                    output the version number
-  -h, --help                       output usage information
+  -V, --version             output the version number
+  -h, --help                output usage information
 
 Commands:
-  generate-key                     Generate a new PASETO key
-  database:migrate                 Migrate database
-  database:rollback                Rollback database
-  database:refresh                 Refresh database
-  database:seed [folder]           Seed database
-  user:assign-role [email] [role]  Asign role to user
+  generate-key              Generate a new PASETO key
+  database [options] <cmd>  Database functions
+
 ```
 
 ## Docker

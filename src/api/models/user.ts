@@ -97,8 +97,8 @@ class User extends Model {
             join: {
                 from: 'users.id',
                 through: {
-                    from: 'roles_roleable.user_id',
-                    to: 'roles_roleable.role_id',
+                    from: 'user_role.user_id',
+                    to: 'user_role.role_id',
                 },
                 to: 'roles.id',
             },

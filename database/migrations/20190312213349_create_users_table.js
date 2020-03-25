@@ -7,6 +7,7 @@ exports.up = function (knex, Promise) {
     table.string('verification_token').nullable()
     table.string('password_reset_token').nullable()
     table.datetime('tokens_revoked_at').nullable()
+    table.text('allowed_ip_addresses').nullable()
     table.timestamps(false, true)
   })
 }

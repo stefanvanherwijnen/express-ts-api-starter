@@ -77,6 +77,7 @@ export class Controller {
             return
         }
 
+        user.email = user.email.toLowerCase()
         user.verificationToken = randomstring.generate(64)
         Object.assign(user, { password: await bcrypt.hash(user.password, 10) })
         // user.password = await bcrypt.hash(user.password, 10)
@@ -179,14 +180,13 @@ export class Controller {
   */
     public async login (req, res): Promise<void> {
         if (req.body.email && req.body.password) {
-            const credentials = { email: req.body.email, password: req.body.password }
-
+            const credentials = { email: req.body.email.toLowerCase(), password: req.body.password }
 
             const user = await User.query().withGraphFetched('roles').findOne('email', credentials.email)
             const token = await PasetoAuth.login(user, credentials)
             if (user) {
                 if (!user.verified) {
-                    res.status(401).send()
+                    return res.status(401).send()
                 }
                 if (token) {
                     const userJson = await JsonSerializer.serialize('user', user)
